@@ -1,0 +1,39 @@
+/* Scroll Reveal Animations */
+
+@keyframes scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-reveal-animated {
+  animation: scroll-reveal 0.6s ease-out forwards;
+}
+
+.scroll-reveal-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-reveal-enter.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered animations for grid items */
+.scroll-reveal-stagger {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.scroll-reveal-stagger.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}

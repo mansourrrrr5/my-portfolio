@@ -1,33 +1,55 @@
-export default function Testimonials() {
-  const testimonials = [
-    {
-      quote:
-        "Aziz delivers high-quality work and approaches problems with strong analytical thinking.",
-      name: "Project Supervisor",
-      role: "Robotics Lab",
-    },
-    {
-      quote:
-        "Reliable, proactive, and technically strong. A valuable team member.",
-      name: "Line Manager",
-      role: "Swisslog",
-    },
-  ];
+"use client";
+
+import { portfolioConfig } from "@/data/content";
+import { Card, SectionGrid } from "@/components/ui/Card";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+function TestimonialCard(
+  testimonial: (typeof portfolioConfig.testimonials)[0],
+  index: number
+) {
+  const { ref, className } = useScrollReveal({
+    threshold: 0.2,
+    delay: index * 80,
+  });
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {testimonials.map((t, i) => (
-        <div
-          key={i}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6"
-        >
-          <p className="text-zinc-300">“{t.quote}”</p>
-          <div className="mt-4">
-            <p className="font-semibold">{t.name}</p>
-            <p className="text-sm text-zinc-400">{t.role}</p>
-          </div>
+    <div
+      key={testimonial.id}
+      ref={ref as React.RefObject<HTMLDivElement>}
+      className={`transition-all duration-600 ${className}`}
+    >
+      <Card>
+        <div className="flex gap-1 mb-3">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-yellow-400">
+              ★
+            </span>
+          ))}
         </div>
-      ))}
+        <p className="text-zinc-300 text-sm italic mb-4">
+          &quot;{testimonial.quote}&quot;
+        </p>
+        <div>
+          <p className="font-semibold text-white text-sm">
+            {testimonial.name}
+          </p>
+          <p className="text-xs text-zinc-400">
+            {testimonial.role}
+            {testimonial.company && ` at ${testimonial.company}`}
+          </p>
+        </div>
+      </Card>
     </div>
+  );
+}
+
+export default function Testimonials() {
+  return (
+    <SectionGrid cols={2}>
+      {portfolioConfig.testimonials.map((testimonial, index) =>
+        TestimonialCard(testimonial, index)
+      )}
+    </SectionGrid>
   );
 }

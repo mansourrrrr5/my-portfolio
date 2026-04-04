@@ -1,36 +1,107 @@
+"use client";
+
+import { portfolioConfig } from "@/data/content";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+const pulseStyles = `
+  @keyframes timeline-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(168, 85, 247, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+    }
+  }
+  
+  .timeline-pulse {
+    animation: timeline-pulse 2s infinite;
+  }
+`;
+
 export default function Experience() {
-  const experiences = [
-    {
-      role: "Working Student IT – Robotics R&D",
-      company: "Swisslog",
-      period: "2024 – Present",
-      description:
-        "Working on computer vision pipelines and AI integration for robotic systems.",
-    },
-    {
-      role: "Bachelor Thesis – Object Detection",
-      company: "THGA",
-      period: "2025",
-      description:
-        "Integrated a lightweight YOLO model into the SweetPicker robotic system.",
-    },
-  ];
+  // Check if experience is current (has "Present" in period)
+  const isCurrentExperience = (period: string) => {
+    return period.toLowerCase().includes("present");
+  };
 
   return (
-    <div className="space-y-6">
-      {experiences.map((exp, i) => (
-        <div
-          key={i}
-          className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6"
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{exp.role}</h3>
-            <span className="text-sm text-zinc-400">{exp.period}</span>
-          </div>
-          <p className="mt-1 text-zinc-400">{exp.company}</p>
-          <p className="mt-3 text-zinc-300">{exp.description}</p>
-        </div>
-      ))}
-    </div>
+    <>
+      <style>{pulseStyles}</style>
+      <div className="relative space-y-8 md:space-y-12">
+        {/* Vertical timeline line */}
+        <div className="absolute left-4 md:left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 via-blue-500 to-zinc-600" />
+
+        {/* Experience entries */}
+        {portfolioConfig.experiences.map((exp, index) => {
+          const isCurrent = isCurrentExperience(exp.period);
+          const { ref, className } = useScrollReveal({
+            threshold: 0.2,
+            delay: index * 100,
+          });
+
+          return (
+            <div
+              key={exp.id}
+              ref={ref as React.RefObject<HTMLDivElement>}
+              className={`relative pl-16 md:pl-20 transition-all duration-600 ${className}`}
+            >
+              {/* Timeline dot/connector */}
+              <div className="absolute -left-6 md:-left-8 top-0 w-7 h-7 md:w-8 md:h-8">
+                <div
+                  className={`w-full h-full rounded-full border-4 border-zinc-900 bg-purple-500 flex items-center justify-center ${
+                    isCurrent ? "timeline-pulse" : ""
+                  }`}
+                >
+                  {isCurrent && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  )}
+                </div>
+              </div>
+
+              {/* Content card */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                  <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
+                  <span
+                    className={`text-sm whitespace-nowrap ${
+                      isCurrent ? "text-purple-400 font-medium" : "text-zinc-400"
+                    }`}
+                  >
+                    {exp.period}
+                  </span>
+                </div>
+
+                <p className="text-sm text-zinc-300 mb-1 font-medium">
+                  {exp.company}
+                </p>
+
+                {exp.location && (
+                  <p className="text-xs text-zinc-500 mb-3">{exp.location}</p>
+                )}
+
+                <p className="text-zinc-300 mb-4">{exp.description}</p>
+
+                {exp.highlights && exp.highlights.length > 0 && (
+                  <ul className="space-y-2">
+                    {exp.highlights.map((highlight, idx) => (
+                      <li
+                        key={idx}
+                        className="text-sm text-zinc-400 flex gap-2"
+                      >
+                        <span className="text-purple-400 flex-shrink-0">→</span>
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
