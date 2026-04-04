@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Section from "@/components/Section";
+import About from "@/components/About";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
 import Testimonials from "@/components/Testimonials";
@@ -14,8 +15,8 @@ export default function Page() {
       <div className="mx-auto max-w-6xl px-6">
         <Hero />
 
-        <Section id="about" title="About Me" children={undefined}>
-          {/* you can put About + Tech stack here */}
+        <Section id="about" title="About Me">
+          <About />
         </Section>
 
         <Section id="experience" title="My Work Experience">
