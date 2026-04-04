@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, lazy } from "react";
+import { portfolioConfig } from "@/data/content";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Section from "@/components/Section";
@@ -103,14 +104,70 @@ export default function Page() {
           <Section id="contact" title="Let's Connect">
             <Contact />
           </Section>
-
-          <footer className="py-10 text-sm text-zinc-500 text-center border-t border-zinc-800 mt-20">
-            <p>
-              © {new Date().getFullYear()} Aziz. Built with Next.js, React & TailwindCSS.
-            </p>
-          </footer>
         </Container>
       </div>
+
+      {/* Enhanced Footer */}
+      <footer className="relative z-10 py-12 mt-24 border-t border-zinc-700 bg-zinc-950/80 backdrop-blur-sm">
+        <style>{`
+          @keyframes footer-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.5); }
+          }
+          
+          .footer-glow:hover {
+            animation: footer-glow 2s ease-in-out infinite;
+          }
+        `}</style>
+        <Container>
+          <div className="flex flex-col items-center gap-8">
+            {/* Social Links */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {portfolioConfig.socials.map((social) => (
+                <a
+                  key={social.platform}
+                  href={social.platform === "resume" ? "/resume.pdf" : social.url}
+                  target={social.platform === "resume" ? undefined : "_blank"}
+                  rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
+                  download={social.platform === "resume" ? true : undefined}
+                  className="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-800/50 hover:border-purple-500 hover:bg-purple-500/10 transition text-sm text-zinc-300 hover:text-purple-300 will-change-transform"
+                  aria-label={social.label}
+                  title={social.label}
+                >
+                  {social.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Copyright */}
+            <p className="text-sm text-zinc-400 text-center">
+              © {new Date().getFullYear()} Aziz. Built with Next.js, React & TailwindCSS.
+            </p>
+
+            {/* Back to Top Button */}
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="footer-glow p-3 rounded-full border border-purple-500/50 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 hover:text-purple-300 transition flex items-center justify-center will-change-transform"
+              aria-label="Back to top"
+              title="Scroll back to top"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 15l7-7 7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </Container>
+      </footer>
     </main>
   );
 }

@@ -6,18 +6,47 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 const pulseStyles = `
   @keyframes timeline-pulse {
     0% {
+      transform: scale(1);
+      opacity: 1;
       box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
     }
-    70% {
-      box-shadow: 0 0 0 8px rgba(168, 85, 247, 0);
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
     }
     100% {
+      transform: scale(1);
+      opacity: 1;
       box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
     }
   }
   
   .timeline-pulse {
     animation: timeline-pulse 2s infinite;
+  }
+
+  @keyframes timeline-entry-appear {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .timeline-entry-animate {
+    animation: timeline-entry-appear 0.6s ease-out forwards;
+  }
+
+  .experience-card-hover {
+    transition: all 0.3s ease;
+  }
+
+  .experience-card-hover:hover {
+    border-left: 4px solid #a855f7;
+    transform: translateX(4px);
   }
 `;
 
@@ -46,7 +75,10 @@ export default function Experience() {
             <div
               key={exp.id}
               ref={ref as React.RefObject<HTMLDivElement>}
-              className={`relative pl-16 md:pl-20 transition-all duration-600 ${className}`}
+              className={`relative pl-16 md:pl-20 transition-all duration-600 timeline-entry-animate ${className}`}
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
             >
               {/* Timeline dot/connector */}
               <div className="absolute -left-6 md:-left-8 top-0 w-7 h-7 md:w-8 md:h-8">
@@ -61,8 +93,8 @@ export default function Experience() {
                 </div>
               </div>
 
-              {/* Content card */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors">
+              {/* Content card with hover effect */}
+              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors experience-card-hover">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                   <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
                   <span

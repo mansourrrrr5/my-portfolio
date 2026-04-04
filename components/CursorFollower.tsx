@@ -31,15 +31,27 @@ export default function CursorFollower() {
 
     // Detect hovering over buttons/links
     const handleMouseEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('a, button, [role="button"], input, label, select, textarea')) {
-        setIsHovering(true);
+      try {
+        const isInteractive = e.target instanceof Element && 
+          e.target.closest('a, button, [role="button"], input, label, select, textarea');
+        if (isInteractive) {
+          setIsHovering(true);
+        }
+      } catch (err) {
+        // silently ignore, reset cursor to default state
+        setIsHovering(false);
       }
     };
 
     const handleMouseLeave = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('a, button, [role="button"], input, label, select, textarea')) {
+      try {
+        const isInteractive = e.target instanceof Element && 
+          e.target.closest('a, button, [role="button"], input, label, select, textarea');
+        if (isInteractive) {
+          setIsHovering(false);
+        }
+      } catch (err) {
+        // silently ignore, reset cursor to default state
         setIsHovering(false);
       }
     };
