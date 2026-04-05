@@ -56,8 +56,12 @@ export default function Navbar() {
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const sectionId = `#${entry.target.id}`;
-          setActive(sectionId);
+          const sectionId = entry.target.id;
+          setActive(`#${sectionId}`);
+          
+          // Emit section change event for mesh color updates
+          const event = new CustomEvent("sectionchange", { detail: sectionId });
+          window.dispatchEvent(event);
         }
       });
     };
