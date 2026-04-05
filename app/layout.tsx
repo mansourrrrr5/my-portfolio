@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/styles/scroll-reveal.css";
 import CursorFollower from "@/components/CursorFollower";
 import BackToTop from "@/components/BackToTop";
+import AiChat from "@/components/AiChat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,6 +74,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-950 text-zinc-50`}
       >
         <CursorFollower />
+        <AiChat />
         <BackToTop />
         {children}
       </body>

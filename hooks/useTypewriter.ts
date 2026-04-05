@@ -5,6 +5,7 @@ interface UseTypewriterOptions {
   speed?: number; // ms per character
   delayBetweenWords?: number; // ms before switching to next word
   loop?: boolean;
+  respectMotion?: boolean; // default true - disable animation if prefers-reduced-motion
 }
 
 export function useTypewriter({
@@ -12,12 +13,25 @@ export function useTypewriter({
   speed = 100,
   delayBetweenWords = 2000,
   loop = true,
+  respectMotion = true,
 }: UseTypewriterOptions) {
   const [displayText, setDisplayText] = useState("");
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    const prefersReducedMotion =
+      respectMotion &&
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // If reduced motion is preferred, show first word immediately as static text
+    if (prefersReducedMotion) {
+      setDisplayText(words[0]);
+      return;
+    }
+
     const currentWord = words[currentWordIndex];
     let timeout: NodeJS.Timeout;
 
@@ -49,7 +63,7 @@ export function useTypewriter({
     }
 
     return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, currentWordIndex, words, speed, delayBetweenWords, loop]);
+  }, [displayText, isDeleting, currentWordIndex, words, speed, delayBetweenWords, loop, respectMotion]);
 
   return displayText;
 }

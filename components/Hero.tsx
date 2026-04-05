@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { portfolioConfig } from "@/data/content";
 import { useTypewriter } from "@/hooks/useTypewriter";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const socialIcons: Record<string, string> = {
   github: "GitHub",
@@ -16,8 +16,8 @@ const socialIcons: Record<string, string> = {
 
 const titles = ["Software Engineer", "AI Specialist", "Computer Vision Engineer"];
 
-// CSS animations for Hero effects
-const heroStyles = `
+// CSS animations for Hero effects - with reduced motion support
+const getHeroStyles = (reducedMotion: boolean) => `
   @keyframes rotate-border {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -59,12 +59,12 @@ const heroStyles = `
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
-    animation: rotate-border 8s linear infinite;
+    animation: ${reducedMotion ? 'none' : 'rotate-border 8s linear infinite'};
     z-index: -1;
   }
 
   .float-particle {
-    animation: float-particle ease-in-out infinite;
+    animation: ${reducedMotion ? 'none' : 'float-particle ease-in-out infinite'};
   }
 
   .shimmer-button::after {
@@ -75,15 +75,15 @@ const heroStyles = `
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: shimmer 0.6s ease-in-out;
+    animation: ${reducedMotion ? 'none' : 'shimmer 0.6s ease-in-out'};
   }
 
   .shimmer-button:hover::after {
-    animation: shimmer 0.6s ease-in-out infinite 0.3s;
+    animation: ${reducedMotion ? 'none' : 'shimmer 0.6s ease-in-out infinite 0.3s'};
   }
 
   .typewriter-glow {
-    animation: text-glow-pulse 2s ease-in-out infinite;
+    animation: ${reducedMotion ? 'none' : 'text-glow-pulse 2s ease-in-out infinite'};
   }
 
   .pulse-badge {
@@ -100,7 +100,7 @@ const heroStyles = `
     height: 8px;
     background-color: #10b981;
     border-radius: 50%;
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: ${reducedMotion ? 'none' : 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'};
   }
 
   @keyframes pulse {
@@ -111,23 +111,78 @@ const heroStyles = `
       opacity: 0.5;
     }
   }
+
+  .magnetic-button {
+    transition: ${reducedMotion ? 'none' : 'transform 0.4s cubic-bezier(0.23, 1, 0.32, 1)'};
+    will-change: transform;
+  }
 `;
 
-// Generate random particles
+// Deterministic seeded random number generator (Mulberry32 - standard algorithm)
+function seededRandom(seed: number) {
+  let x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+// Generate particles with deterministic values (same on server and client)
 function generateParticles(count: number) {
-  return Array.from({ length: count }).map((_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-    size: Math.random() * 2 + 2,
-    duration: Math.random() * 4 + 3,
-    color: ["bg-purple-500", "bg-blue-500", "bg-cyan-500"][Math.floor(Math.random() * 3)],
-  }));
+  const colors = ["bg-purple-500", "bg-blue-500", "bg-cyan-500"];
+  const particles = [];
+  
+  for (let i = 0; i < count; i++) {
+    // Use consistent seed multipliers
+    const leftVal = seededRandom(i * 12.9898 + 78.233);
+    const topVal = seededRandom(i * 78.233 + 43.141);
+    const sizeVal = seededRandom(i * 43.141 + 94.673);
+    const durationVal = seededRandom(i * 94.673 + 33.141);
+    const colorIdx = Math.floor(seededRandom(i * 33.141 + 12.9898) * 3);
+    
+    particles.push({
+      id: i,
+      left: Number((leftVal * 100).toFixed(2)),
+      top: Number((topVal * 100).toFixed(2)),
+      size: Number((sizeVal * 2 + 2).toFixed(2)),
+      duration: Number((durationVal * 4 + 3).toFixed(3)),
+      color: colors[colorIdx],
+    });
+  }
+  
+  return particles;
 }
 
 export default function Hero() {
   const [particles] = useState(() => generateParticles(12));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const button1Ref = useRef<HTMLAnchorElement>(null);
+  const button2Ref = useRef<HTMLAnchorElement>(null);
+  const [button1Transform, setButton1Transform] = useState("translate(0, 0)");
+  const [button2Transform, setButton2Transform] = useState("translate(0, 0)");
+  const animationRef = useRef<number | null>(null);
+  const particleContainerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Check for reduced motion preference
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Scroll-linked parallax using Framer Motion
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  // Text moves up by 60px, opacity fades to 0 at 60% scroll
+  const textY = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  // Avatar scales from 1 to 0.85
+  const avatarScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.85]);
+
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setReducedMotion(prefersReducedMotion);
+  }, []);
 
   const typewriterText = useTypewriter({
     words: titles,
@@ -143,6 +198,59 @@ export default function Hero() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const createParticleBurst = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (reducedMotion || !particleContainerRef.current) return;
+
+    const rect = (e.currentTarget as HTMLAnchorElement).getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    const colors = ["bg-purple-500", "bg-blue-500"];
+
+    for (let i = 0; i < 12; i++) {
+      const particle = document.createElement("div");
+      particle.className = `${colors[Math.floor(Math.random() * colors.length)]} rounded-full`;
+      particle.style.position = "fixed";
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      particle.style.width = `${8 + Math.random() * 4}px`;
+      particle.style.height = `${8 + Math.random() * 4}px`;
+      particle.style.pointerEvents = "none";
+      particle.style.zIndex = "9999";
+
+      const angle = (Math.PI * 2 * i) / 12 + (Math.random() - 0.5) * 0.5;
+      const velocity = 80 + Math.random() * 120;
+      const randomX = Math.cos(angle) * velocity;
+      const randomY = Math.sin(angle) * velocity;
+
+      particleContainerRef.current.appendChild(particle);
+
+      // Use Framer Motion animate with duration and ease
+      const startTime = Date.now();
+      const duration = 600;
+
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // easeOut
+
+        particle.style.transform = `translate(${randomX * easeProgress}px, ${randomY * easeProgress}px)`;
+        particle.style.opacity = String(1 - easeProgress);
+        particle.style.scale = String(1 - easeProgress);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          if (particleContainerRef.current?.contains(particle)) {
+            particleContainerRef.current.removeChild(particle);
+          }
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
@@ -166,15 +274,63 @@ export default function Hero() {
     setParallax({ x: 0, y: 0 });
   };
 
+  const handleButtonMouseMove = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    buttonRef: React.RefObject<HTMLAnchorElement | null>,
+    setTransform: (transform: string) => void
+  ) => {
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const rect = button.getBoundingClientRect();
+    const buttonCenterX = rect.left + rect.width / 2;
+    const buttonCenterY = rect.top + rect.height / 2;
+
+    const distance = Math.hypot(e.clientX - buttonCenterX, e.clientY - buttonCenterY);
+    const maxDistance = 60;
+
+    if (distance < maxDistance) {
+      const angle = Math.atan2(e.clientY - buttonCenterY, e.clientX - buttonCenterX);
+      const strength = (maxDistance - distance) / maxDistance;
+      const pullX = Math.cos(angle) * strength * 8;
+      const pullY = Math.sin(angle) * strength * 8;
+
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+
+      animationRef.current = requestAnimationFrame(() => {
+        setTransform(`translate(${pullX}px, ${pullY}px)`);
+      });
+    }
+  };
+
+  const handleButtonMouseLeave = (setTransform: (transform: string) => void) => {
+    setTransform("translate(0, 0)");
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
   const nameLetters = portfolioConfig.name.split("");
 
   return (
     <section 
+      ref={sectionRef}
       className="relative min-h-[85vh] flex items-center justify-between bg-grid pt-20"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <style>{heroStyles}</style>
+      <div ref={particleContainerRef} className="fixed inset-0 pointer-events-none z-[9999]" />
+      <style>{getHeroStyles(reducedMotion)}</style>
 
       {/* Floating particle dots */}
       {particles.map((particle) => (
@@ -189,6 +345,7 @@ export default function Hero() {
             borderRadius: '50%',
             animationDuration: `${particle.duration}s`,
           }}
+          suppressHydrationWarning
         />
       ))}
 
@@ -202,19 +359,20 @@ export default function Hero() {
           className="space-y-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: reducedMotion ? 0 : 0.6 }}
+          style={{ y: textY, opacity: heroOpacity }}
         >
           <motion.div
             className="space-y-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
+            transition={{ delay: reducedMotion ? 0 : 0.2, duration: reducedMotion ? 0 : 0.6 }}
           >
             <motion.p
               className="text-sm uppercase tracking-widest text-zinc-400"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
+              transition={{ delay: reducedMotion ? 0 : 0.1, duration: reducedMotion ? 0 : 0.5 }}
             >
               Welcome! Let's build together.
             </motion.p>
@@ -240,8 +398,8 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
-                      delay: 0.3 + index * 0.1,
-                      duration: 0.5,
+                      delay: reducedMotion ? 0 : 0.3 + index * 0.1,
+                      duration: reducedMotion ? 0 : 0.5,
                     }}
                     className="inline-block"
                   >
@@ -256,14 +414,14 @@ export default function Hero() {
               className="text-lg text-zinc-300 leading-relaxed max-w-xl min-h-8"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
+              transition={{ delay: reducedMotion ? 0 : 0.5, duration: reducedMotion ? 0 : 0.6 }}
             >
               <span className="inline-block min-w-[280px] h-8">
                 <span className="typewriter-glow">{typewriterText}</span>
                 <motion.span
                   className="ml-1 inline-block w-2 h-8 bg-purple-400"
                   animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.6, repeat: Infinity }}
+                  transition={{ duration: reducedMotion ? 0 : 0.6, repeat: reducedMotion ? 0 : Infinity }}
                 />
               </span>
               . I build{" "}
@@ -283,7 +441,7 @@ export default function Hero() {
             className="flex gap-3 flex-wrap pt-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6, staggerChildren: 0.05 }}
+            transition={{ delay: reducedMotion ? 0 : 0.6, duration: reducedMotion ? 0 : 0.6, staggerChildren: reducedMotion ? 0 : 0.05 }}
           >
             {portfolioConfig.socials.map((social, index) => (
               <motion.a
@@ -308,9 +466,9 @@ export default function Hero() {
                 title={social.label}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.05, duration: 0.4 }}
-                whileHover={{ scale: 1.05, y: -4 }}
-                whileTap={{ scale: 0.95 }}
+                transition={{ delay: reducedMotion ? 0 : 0.6 + index * 0.05, duration: reducedMotion ? 0 : 0.4 }}
+                whileHover={{ scale: reducedMotion ? 1 : 1.05, y: reducedMotion ? 0 : -4 }}
+                whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
               >
                 {socialIcons[social.platform]}
               </motion.a>
@@ -322,22 +480,32 @@ export default function Hero() {
             className="flex flex-wrap gap-4 pt-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
+            transition={{ delay: reducedMotion ? 0 : 0.8, duration: reducedMotion ? 0 : 0.6 }}
           >
             <motion.a
+              ref={button1Ref}
               href="#projects"
-              className="relative rounded-xl border border-purple-500 bg-purple-500/10 px-6 py-3 text-sm font-semibold text-purple-400 hover:bg-purple-500/20 transition shimmer-button overflow-hidden"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              className="magnetic-button relative rounded-xl border border-purple-500 bg-purple-500/10 px-6 py-3 text-sm font-semibold text-purple-400 hover:bg-purple-500/20 transition shimmer-button overflow-hidden"
+              style={{ transform: button1Transform }}
+              onMouseMove={(e) => handleButtonMouseMove(e, button1Ref, setButton1Transform)}
+              onMouseLeave={() => handleButtonMouseLeave(setButton1Transform)}
+              onClick={createParticleBurst}
+              whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
+              whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
             >
               View my work →
             </motion.a>
 
             <motion.a
+              ref={button2Ref}
               href="#contact"
-              className="relative rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 transition shimmer-button overflow-hidden"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              className="magnetic-button relative rounded-xl border border-zinc-700 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 transition shimmer-button overflow-hidden"
+              style={{ transform: button2Transform }}
+              onMouseMove={(e) => handleButtonMouseMove(e, button2Ref, setButton2Transform)}
+              onMouseLeave={() => handleButtonMouseLeave(setButton2Transform)}
+              onClick={createParticleBurst}
+              whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
+              whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
             >
               Get in touch
             </motion.a>
@@ -352,7 +520,8 @@ export default function Hero() {
           transition={{ delay: 0.4, duration: 0.8 }}
           style={{
             transform: `translate(${parallax.x}px, ${parallax.y}px)`,
-            transition: 'transform 0.1s ease-out',
+            transition: reducedMotion ? 'none' : 'transform 0.1s ease-out',
+            scale: avatarScale,
           }}
         >
           {/* Blue glow background */}

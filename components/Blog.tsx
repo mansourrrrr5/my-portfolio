@@ -55,11 +55,11 @@ export default function Blog() {
 
             <div className="flex items-center justify-between pt-2">
               <span className="text-xs text-zinc-500">
-                {new Date(post.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {(() => {
+                  const [year, month, day] = post.date.split("-");
+                  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                  return `${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+                })()}
               </span>
               <a
                 href={`/blog/${post.slug}`}

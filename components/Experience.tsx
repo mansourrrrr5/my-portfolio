@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { portfolioConfig } from "@/data/content";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const pulseStyles = `
   @keyframes timeline-pulse {
@@ -51,6 +52,13 @@ const pulseStyles = `
 `;
 
 export default function Experience() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start 80%", "end 20%"],
+  });
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
   // Check if experience is current (has "Present" in period)
   const isCurrentExperience = (period: string) => {
     return period.toLowerCase().includes("present");
@@ -59,29 +67,30 @@ export default function Experience() {
   return (
     <>
       <style>{pulseStyles}</style>
-      <div className="relative space-y-8 md:space-y-12">
-        {/* Vertical timeline line */}
-        <div className="absolute left-4 md:left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 via-blue-500 to-zinc-600" />
+      <div className="relative space-y-8 md:space-y-12" ref={sectionRef}>
+        {/* Animated vertical timeline line */}
+        <motion.div
+          className="absolute left-4 md:left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 via-blue-500 to-zinc-600"
+          style={{ scaleY, transformOrigin: "top" }}
+        />
 
         {/* Experience entries */}
         {portfolioConfig.experiences.map((exp, index) => {
           const isCurrent = isCurrentExperience(exp.period);
-          const { ref, className } = useScrollReveal({
-            threshold: 0.2,
-            delay: index * 100,
-          });
 
           return (
             <div
               key={exp.id}
-              ref={ref as React.RefObject<HTMLDivElement>}
-              className={`relative pl-16 md:pl-20 transition-all duration-600 timeline-entry-animate ${className}`}
-              style={{
-                animationDelay: `${index * 100}ms`,
-              }}
+              className="relative pl-16 md:pl-20 transition-all duration-600"
             >
               {/* Timeline dot/connector */}
-              <div className="absolute -left-6 md:-left-8 top-0 w-7 h-7 md:w-8 md:h-8">
+              <motion.div
+                className="absolute -left-6 md:-left-8 top-0 w-7 h-7 md:w-8 md:h-8"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                viewport={{ once: true }}
+              >
                 <div
                   className={`w-full h-full rounded-full border-4 border-zinc-900 bg-purple-500 flex items-center justify-center ${
                     isCurrent ? "timeline-pulse" : ""
@@ -91,7 +100,7 @@ export default function Experience() {
                     <div className="w-2 h-2 bg-white rounded-full" />
                   )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Content card with hover effect */}
               <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors experience-card-hover">

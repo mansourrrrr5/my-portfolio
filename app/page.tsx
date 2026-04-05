@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { portfolioConfig } from "@/data/content";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -30,42 +30,74 @@ function SectionSkeleton() {
   );
 }
 
-const meshStyles = `
-  @keyframes mesh-drift-1 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(30px, 15px); }
-  }
-  @keyframes mesh-drift-2 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-25px, 20px); }
-  }
-  @keyframes mesh-drift-3 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(20px, -30px); }
-  }
-  @keyframes mesh-drift-4 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-15px, -25px); }
-  }
-  
-  .mesh-1 { animation: mesh-drift-1 12s ease-in-out infinite; }
-  .mesh-2 { animation: mesh-drift-2 10s ease-in-out infinite; }
-  .mesh-3 { animation: mesh-drift-3 11s ease-in-out infinite; }
-  .mesh-4 { animation: mesh-drift-4 9s ease-in-out infinite; }
-`;
+// Animated mesh component that delays animations until Hero mounts
+function AnimatedMesh() {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    // Delay animation start to avoid blocking Hero render
+    const timer = requestAnimationFrame(() => {
+      setIsAnimating(true);
+    });
+
+    return () => cancelAnimationFrame(timer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none">
+      <div
+        className={`absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full blur-[120px] opacity-10 md:opacity-5 transition-all ${
+          isAnimating ? "mesh-1" : ""
+        }`}
+      />
+      <div
+        className={`absolute top-1/3 right-1/4 w-80 h-80 bg-blue-500 rounded-full blur-[120px] opacity-10 md:opacity-5 transition-all ${
+          isAnimating ? "mesh-2" : ""
+        }`}
+      />
+      <div
+        className={`absolute bottom-1/4 left-1/3 w-96 h-96 bg-cyan-500 rounded-full blur-[120px] opacity-10 md:opacity-5 transition-all ${
+          isAnimating ? "mesh-3" : ""
+        }`}
+      />
+      <div
+        className={`absolute bottom-1/3 right-1/3 w-80 h-80 bg-purple-600 rounded-full blur-[120px] opacity-10 md:opacity-5 transition-all ${
+          isAnimating ? "mesh-4" : ""
+        }`}
+      />
+    </div>
+  );
+}
 
 export default function Page() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-50 relative overflow-hidden">
-      <style>{meshStyles}</style>
+      <style>{`
+        @keyframes mesh-drift-1 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(30px, 15px); }
+        }
+        @keyframes mesh-drift-2 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(-25px, 20px); }
+        }
+        @keyframes mesh-drift-3 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(20px, -30px); }
+        }
+        @keyframes mesh-drift-4 {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(-15px, -25px); }
+        }
+        
+        .mesh-1 { animation: mesh-drift-1 12s ease-in-out infinite; }
+        .mesh-2 { animation: mesh-drift-2 10s ease-in-out infinite; }
+        .mesh-3 { animation: mesh-drift-3 11s ease-in-out infinite; }
+        .mesh-4 { animation: mesh-drift-4 9s ease-in-out infinite; }
+      `}</style>
       
       {/* Animated Background Mesh */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="mesh-1 absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full blur-[120px] opacity-10 md:opacity-5" />
-        <div className="mesh-2 absolute top-1/3 right-1/4 w-80 h-80 bg-blue-500 rounded-full blur-[120px] opacity-10 md:opacity-5" />
-        <div className="mesh-3 absolute bottom-1/4 left-1/3 w-96 h-96 bg-cyan-500 rounded-full blur-[120px] opacity-10 md:opacity-5" />
-        <div className="mesh-4 absolute bottom-1/3 right-1/3 w-80 h-80 bg-purple-600 rounded-full blur-[120px] opacity-10 md:opacity-5" />
-      </div>
+      <AnimatedMesh />
 
       {/* Content */}
       <div className="relative z-10">
@@ -141,7 +173,7 @@ export default function Page() {
 
             {/* Copyright */}
             <p className="text-sm text-zinc-400 text-center">
-              © {new Date().getFullYear()} Aziz. Built with Next.js, React & TailwindCSS.
+              © 2026 Aziz. Built with Next.js, React & TailwindCSS.
             </p>
 
             {/* Back to Top Button */}

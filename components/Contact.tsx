@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { portfolioConfig } from "@/data/content";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
@@ -40,15 +40,40 @@ const contactStyles = `
   .gradient-blob {
     animation: gradient-shift 4s ease-in-out infinite;
   }
+
+  @keyframes fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .min-length-hint {
+    animation: fade-out 0.3s ease-out forwards;
+  }
 `;
+
+const MAX_MESSAGE_LENGTH = 500;
+const MIN_MESSAGE_LENGTH = 10;
 
 export default function Contact() {
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [messageCharCount, setMessageCharCount] = useState(0);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [emailError, setEmailError] = useState("");
   const [messageError, setMessageError] = useState("");
+  
+  // Smart reply suggestions
+  const [replySuggestions, setReplySuggestions] = useState<string[]>([]);
+  const [showReplySuggestions, setShowReplySuggestions] = useState(false);
+  const [replyLoading, setReplyLoading] = useState(false);
+  const replyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cover letter generator
+  const [showCoverLetter, setShowCoverLetter] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
+  const [coverLetterOutput, setCoverLetterOutput] = useState("");
+  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
 
   const { ref: contactRef, className: contactClassName } = useScrollReveal({
     threshold: 0.2,
@@ -63,7 +88,15 @@ export default function Contact() {
 
   // Message validation
   const isMessageValid = (value: string): boolean => {
-    return value.trim().length >= 10;
+    return value.trim().length >= MIN_MESSAGE_LENGTH && value.length <= MAX_MESSAGE_LENGTH;
+  };
+
+  // Determine character counter color based on count
+  const getCharacterCountColor = (count: number): string => {
+    if (count === 0) return "text-zinc-500";
+    if (count < 400) return "text-green-500";
+    if (count < 480) return "text-amber-500";
+    return "text-red-500";
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,14 +110,185 @@ export default function Contact() {
   };
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    let value = e.target.value;
+    // Prevent exceeding max length
+    if (value.length > MAX_MESSAGE_LENGTH) {
+      value = value.slice(0, MAX_MESSAGE_LENGTH);
+    }
     setMessage(value);
-    if (value && !isMessageValid(value)) {
-      setMessageError("Message must be at least 10 characters");
+    setMessageCharCount(value.length);
+    
+    // Update error message based on character count
+    if (value && value.length < MIN_MESSAGE_LENGTH) {
+      setMessageError(`Message must be at least ${MIN_MESSAGE_LENGTH} characters`);
+    } else if (value.length > MAX_MESSAGE_LENGTH) {
+      setMessageError("Message cannot exceed 500 characters");
     } else {
       setMessageError("");
     }
+
+    // Debounce smart reply suggestions after 30 characters
+    if (replyTimeoutRef.current) {
+      clearTimeout(replyTimeoutRef.current);
+    }
+
+    if (value.length >= 30) {
+      setShowReplySuggestions(false);
+      replyTimeoutRef.current = setTimeout(() => {
+        fetchSmartReplySuggestions(value);
+      }, 1500);
+    } else {
+      setReplySuggestions([]);
+      setShowReplySuggestions(false);
+    }
   };
+
+  const fetchSmartReplySuggestions = async (messageText: string) => {
+    setReplyLoading(true);
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+      if (!apiKey) throw new Error("API key not configured");
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 150,
+          system:
+            "Given a message from a website visitor, suggest 3 concise smart reply starters that Aziz could use to respond. Return as JSON array of strings only. Example: [\"Thanks for reaching out!\", \"Great question about...\", \"I appreciate your interest...\"]",
+          messages: [
+            {
+              role: "user",
+              content: `Message: "${messageText}"`,
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) throw new Error("API error");
+
+      let fullResponse = "";
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const json = JSON.parse(line.slice(6));
+              if (json.type === "content_block_delta" && json.delta?.text) {
+                fullResponse += json.delta.text;
+              }
+            } catch {
+              // Skip non-JSON lines
+            }
+          }
+        }
+      }
+
+      // Parse JSON response
+      const suggestions = JSON.parse(fullResponse);
+      setReplySuggestions(Array.isArray(suggestions) ? suggestions : []);
+      setShowReplySuggestions(true);
+    } catch (error) {
+      console.error("Smart reply error:", error);
+      setReplySuggestions([]);
+    } finally {
+      setReplyLoading(false);
+    }
+  };
+
+  const handleReplySuggestionClick = async (suggestion: string) => {
+    await navigator.clipboard.writeText(suggestion);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleGenerateCoverLetter = async () => {
+    if (!jobDescription.trim()) return;
+
+    setCoverLetterLoading(true);
+    setCoverLetterOutput("");
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+      if (!apiKey) throw new Error("API key not configured");
+
+      const systemPrompt = `You are writing a cover letter for Aziz, a Software Engineer & AI Specialist. Here is his profile: ${JSON.stringify(
+        portfolioConfig,
+        null,
+        2
+      )}. Write a concise, personalized cover letter for the job description provided. 3 paragraphs max. Do not use generic phrases.`;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 600,
+          system: systemPrompt,
+          messages: [
+            {
+              role: "user",
+              content: `Job Description: ${jobDescription}`,
+            },
+          ],
+        }),
+      });
+
+      if (!response.ok) throw new Error("API error");
+
+      let fullResponse = "";
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const json = JSON.parse(line.slice(6));
+              if (json.type === "content_block_delta" && json.delta?.text) {
+                fullResponse += json.delta.text;
+                setCoverLetterOutput(fullResponse);
+              }
+            } catch {
+              // Skip non-JSON lines
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Cover letter error:", error);
+      setCoverLetterOutput("Error generating cover letter. Please try again.");
+    } finally {
+      setCoverLetterLoading(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(coverLetterOutput);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const wordCount = coverLetterOutput.split(/\s+/).filter((word) => word.length > 0).length;
 
   const handleCopyEmail = async () => {
     await navigator.clipboard.writeText(portfolioConfig.email);
@@ -101,6 +305,10 @@ export default function Contact() {
     }
     if (!isMessageValid(message)) {
       setMessageError("Message must be at least 10 characters");
+      return;
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      setMessageError("Message cannot exceed 500 characters");
       return;
     }
 
@@ -245,21 +453,136 @@ export default function Contact() {
                     onChange={handleMessageChange}
                     placeholder="Tell me about your project..."
                     rows={5}
+                    maxLength={MAX_MESSAGE_LENGTH}
                     className={`w-full px-4 py-3 rounded-xl contact-input text-white placeholder-zinc-500 resize-none ${
                       message && messageError ? "error" : message && isMessageValid(message) ? "success" : ""
                     }`}
                   />
-                  {message && isMessageValid(message) && (
+                  {/* Min length hint - fades away at 10 chars */}
+                  {messageCharCount > 0 && messageCharCount < MIN_MESSAGE_LENGTH && (
+                    <div className="absolute right-4 top-3 text-zinc-400 text-xs min-length-hint">
+                      min {MIN_MESSAGE_LENGTH} chars
+                    </div>
+                  )}
+                  {/* Success/error indicators */}
+                  {messageCharCount >= MIN_MESSAGE_LENGTH && messageCharCount <= MAX_MESSAGE_LENGTH && !messageError && (
                     <span className="absolute right-4 top-3 text-green-500 text-lg">✓</span>
                   )}
-                  {message && messageError && (
+                  {message && messageError && messageCharCount <= 10 && (
                     <span className="absolute right-4 top-3 text-red-500 text-lg">✕</span>
                   )}
                 </div>
-                {messageError && (
-                  <p className="text-red-400 text-xs mt-1">{messageError}</p>
+                {/* Character counter with color coding */}
+                <div className="flex items-center justify-between mt-2">
+                  {messageError && (
+                    <p className="text-red-400 text-xs">{messageError}</p>
+                  )}
+                  <div className={`text-xs ml-auto ${getCharacterCountColor(messageCharCount)}`}>
+                    {messageCharCount}/{MAX_MESSAGE_LENGTH}
+                  </div>
+                </div>
+
+                {/* Smart Reply Suggestions */}
+                {showReplySuggestions && !replyLoading && replySuggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 space-y-2"
+                  >
+                    <p className="text-xs text-zinc-400">Suggested replies:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {replySuggestions.map((suggestion, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleReplySuggestionClick(suggestion)}
+                          className="text-xs px-3 py-1 rounded-full bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/50 transition cursor-pointer"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-zinc-500">Click any to copy to clipboard</p>
+                  </motion.div>
+                )}
+
+                {replyLoading && (
+                  <div className="mt-3 flex gap-2 items-center text-xs text-zinc-400">
+                    <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce delay-100" />
+                    <div className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce delay-200" />
+                  </div>
                 )}
               </div>
+
+              {/* Cover Letter Generator */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="border border-zinc-700 rounded-xl p-4 bg-zinc-800/30"
+              >
+                <button
+                  type="button"
+                  onClick={() => setShowCoverLetter(!showCoverLetter)}
+                  className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition"
+                >
+                  {showCoverLetter ? "▼" : "▶"} Generate Cover Letter
+                </button>
+
+                {showCoverLetter && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 space-y-3"
+                  >
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-300 mb-2">
+                        Paste Job Description
+                      </label>
+                      <textarea
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Paste the job description or role title here..."
+                        rows={4}
+                        className="w-full px-3 py-2 rounded-lg bg-zinc-700 text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleGenerateCoverLetter}
+                      disabled={coverLetterLoading || !jobDescription.trim()}
+                      className="w-full px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white text-sm font-medium transition"
+                    >
+                      {coverLetterLoading ? "Generating..." : "Generate Cover Letter"}
+                    </button>
+
+                    {coverLetterOutput && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-zinc-400">
+                            Word count: {wordCount}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={copyToClipboard}
+                            className="text-xs px-2 py-1 rounded bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 transition"
+                          >
+                            {copied ? "✓ Copied!" : "Copy"}
+                          </button>
+                        </div>
+                        <textarea
+                          readOnly
+                          value={coverLetterOutput}
+                          rows={5}
+                          className="w-full px-3 py-2 rounded-lg bg-zinc-700 text-zinc-200 text-sm resize-none focus:outline-none"
+                        />
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </motion.div>
 
               {/* Submit Button */}
               <motion.button
