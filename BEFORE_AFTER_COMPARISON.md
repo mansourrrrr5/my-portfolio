@@ -677,7 +677,7 @@ export default function Experience() {
     "Integrated machine learning models into production environments",
     "Collaborated on automation optimization and system design",
   ],
-  location: "Switzerland",
+  location: "Germany",
   type: "work",
 }
 ```

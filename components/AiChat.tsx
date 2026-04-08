@@ -35,78 +35,75 @@ export default function AiChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const question = (e as CustomEvent<string>).detail;
+      setIsOpen(true);
+      // Small delay so the panel animates open before the message fires
+      setTimeout(() => {
+        handleSendMessage(question);
+      }, 400);
+    };
+    window.addEventListener("open-ai-chat", handler);
+    return () => window.removeEventListener("open-ai-chat", handler);
+  }, []);
 
-    // Add user message
-    const userMessage: Message = { role: "user", content: input };
+  const handleSendMessage = async (overrideText?: string) => {
+    const textToSend = overrideText ?? input;
+    if (!textToSend.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: textToSend };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    if (!overrideText) setInput("");
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+
       if (!apiKey) {
-        throw new Error("API key not configured");
+        throw new Error("OpenRouter API key not configured");
       }
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "http://localhost:3000",
+          "X-Title": "Aziz Portfolio Chat",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: "openai/gpt-4o-mini",
           max_tokens: 400,
-          system: SYSTEM_PROMPT,
-          messages: [...messages, userMessage],
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...messages,
+            userMessage,
+          ],
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errText = await response.text();
+        console.error("OpenRouter error:", response.status, errText);
+        throw new Error(`API error: ${response.status} ${errText}`);
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body");
+      const data = await response.json();
+      const assistantMessage =
+        data.choices?.[0]?.message?.content || "No response.";
 
-      let fullResponse = "";
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            try {
-              const json = JSON.parse(data);
-              if (json.type === "content_block_delta" && json.delta?.text) {
-                fullResponse += json.delta.text;
-                setMessages((prev) => [
-                  ...prev.slice(0, -1),
-                  { role: "assistant", content: fullResponse },
-                ]);
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
-      }
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: assistantMessage },
+      ]);
     } catch (error) {
       console.error("Chat error:", error);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "Sorry, I encountered an error. Please try again later.",
+          content: "Sorry, I encountered an error. Please try again later.",
         },
       ]);
     } finally {
@@ -116,7 +113,6 @@ export default function AiChat() {
 
   return (
     <div className="fixed bottom-20 left-6 z-40">
-      {/* Chat Bubble */}
       <AnimatePresence mode="wait">
         {!isOpen && (
           <motion.button
@@ -142,9 +138,8 @@ export default function AiChat() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="absolute bottom-0 left-0 w-[360px] h-[480px] bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
-            {/* Header */}
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4 flex justify-between items-center">
-              <h3 className="text-white font-semibold">Chat with Aziz</h3>
+              <h3 className="text-white font-semibold">Chat with Aziz's AI-Assitant</h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-white hover:text-gray-200 text-xl"
@@ -154,7 +149,6 @@ export default function AiChat() {
               </button>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg, index) => (
                 <div
@@ -174,6 +168,7 @@ export default function AiChat() {
                   </div>
                 </div>
               ))}
+
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-zinc-800 rounded-lg px-4 py-2">
@@ -185,10 +180,10 @@ export default function AiChat() {
                   </div>
                 </div>
               )}
+
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <div className="border-t border-zinc-800 p-4 flex gap-2">
               <input
                 type="text"
@@ -205,7 +200,7 @@ export default function AiChat() {
                 disabled={isLoading}
               />
               <button
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage()}
                 disabled={isLoading || !input.trim()}
                 className="bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white rounded-lg px-4 py-2 text-sm font-medium transition"
                 aria-label="Send message"

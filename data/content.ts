@@ -5,17 +5,17 @@ export const portfolioConfig: PortfolioConfig = {
   title: "Software Engineer & AI Specialist",
   description:
     "Passionate developer focused on building impactful digital solutions at the intersection of software engineering and intelligent automation.",
-  email: "aziz@email.com",
+  email: "aziz.mansour.tn@gmail.com",
   
   socials: [
     {
       platform: "github",
-      url: "https://github.com",
+      url: "https://github.com/mansourrrrr5",
       label: "GitHub",
     },
     {
       platform: "linkedin",
-      url: "https://linkedin.com",
+      url: "https://www.linkedin.com/in/mohamed-aziz-mansour-5a39b2278/",
       label: "LinkedIn",
     },
     {
@@ -32,6 +32,7 @@ export const portfolioConfig: PortfolioConfig = {
 
   skills: [
     { name: "Python", category: "backend", proficiency: "expert" },
+    { name: "C/C++", category: "backend", proficiency: "expert" },
     { name: "Machine Learning", category: "ml", proficiency: "advanced" },
     { name: "Computer Vision", category: "ml", proficiency: "advanced" },
     { name: "Next.js", category: "frontend", proficiency: "advanced" },
@@ -42,8 +43,11 @@ export const portfolioConfig: PortfolioConfig = {
     { name: "Docker", category: "devops", proficiency: "advanced" },
     { name: "Linux", category: "devops", proficiency: "advanced" },
     { name: "SQL", category: "backend", proficiency: "intermediate" },
+    { name: "PHP", category: "backend", proficiency: "intermediate" },
     { name: "WebSockets", category: "backend", proficiency: "intermediate" },
     { name: "TailwindCSS", category: "frontend", proficiency: "advanced" },
+    { name: "CSS", category: "frontend", proficiency: "advanced" },
+    { name: "HTML", category: "frontend", proficiency: "advanced" },
     { name: "Git", category: "tools", proficiency: "expert" },
   ],
 
@@ -61,7 +65,7 @@ export const portfolioConfig: PortfolioConfig = {
         "Integrated machine learning models into production environments",
         "Collaborated on automation optimization and system design",
       ],
-      location: "Switzerland",
+      location: "Germany",
       type: "work",
     },
     {

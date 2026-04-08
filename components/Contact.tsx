@@ -69,12 +69,6 @@ export default function Contact() {
   const [replyLoading, setReplyLoading] = useState(false);
   const replyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Cover letter generator
-  const [showCoverLetter, setShowCoverLetter] = useState(false);
-  const [jobDescription, setJobDescription] = useState("");
-  const [coverLetterOutput, setCoverLetterOutput] = useState("");
-  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
-
   const { ref: contactRef, className: contactClassName } = useScrollReveal({
     threshold: 0.2,
     delay: 0,
@@ -143,152 +137,79 @@ export default function Contact() {
     }
   };
 
-  const fetchSmartReplySuggestions = async (messageText: string) => {
-    setReplyLoading(true);
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error("API key not configured");
+const fetchSmartReplySuggestions = async (messageText: string) => {
+  setReplyLoading(true);
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 150,
-          system:
-            "Given a message from a website visitor, suggest 3 concise smart reply starters that Aziz could use to respond. Return as JSON array of strings only. Example: [\"Thanks for reaching out!\", \"Great question about...\", \"I appreciate your interest...\"]",
-          messages: [
-            {
-              role: "user",
-              content: `Message: "${messageText}"`,
-            },
-          ],
-        }),
-      });
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    console.log("API KEY:", process.env.NEXT_PUBLIC_OPENROUTER_API_KEY);
+    if (!apiKey) throw new Error("OpenRouter API key not configured");
 
-      if (!response.ok) throw new Error("API error");
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "HTTP-Referer": "http://localhost:3000",
+        "X-OpenRouter-Title": "Aziz Portfolio Chat",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o-mini",
+        max_tokens: 150,
+        temperature: 0.4,
+        messages: [
+          {
+            role: "system",
+            content:
+              'Given a message from a website visitor, suggest 3 concise smart reply starters that Aziz could use to respond. Return ONLY a valid JSON array of strings. Example: ["Thanks for reaching out!", "Great question about...", "I appreciate your interest..."]',
+          },
+          {
+            role: "user",
+            content: `Message: "${messageText}"`,
+          },
+        ],
+      }),
+    });
 
-      let fullResponse = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const json = JSON.parse(line.slice(6));
-              if (json.type === "content_block_delta" && json.delta?.text) {
-                fullResponse += json.delta.text;
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
-      }
-
-      // Parse JSON response
-      const suggestions = JSON.parse(fullResponse);
-      setReplySuggestions(Array.isArray(suggestions) ? suggestions : []);
-      setShowReplySuggestions(true);
-    } catch (error) {
-      console.error("Smart reply error:", error);
-      setReplySuggestions([]);
-    } finally {
-      setReplyLoading(false);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenRouter smart reply error:", response.status, errText);
+      throw new Error(`API error: ${response.status} ${errText}`);
     }
-  };
 
+    const data = await response.json();
+    const rawContent = data.choices?.[0]?.message?.content ?? "[]";
+
+    let suggestions: string[] = [];
+
+    try {
+      suggestions = JSON.parse(rawContent);
+    } catch {
+      // fallback if model wraps JSON in markdown fences
+      const cleaned = rawContent
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      suggestions = JSON.parse(cleaned);
+    }
+
+    setReplySuggestions(Array.isArray(suggestions) ? suggestions : []);
+    setShowReplySuggestions(true);
+  } catch (error) {
+    console.error("Smart reply error:", error);
+    setReplySuggestions([]);
+    setShowReplySuggestions(false);
+  } finally {
+    setReplyLoading(false);
+  }
+};
   const handleReplySuggestionClick = async (suggestion: string) => {
     await navigator.clipboard.writeText(suggestion);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const handleGenerateCoverLetter = async () => {
-    if (!jobDescription.trim()) return;
-
-    setCoverLetterLoading(true);
-    setCoverLetterOutput("");
-
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error("API key not configured");
-
-      const systemPrompt = `You are writing a cover letter for Aziz, a Software Engineer & AI Specialist. Here is his profile: ${JSON.stringify(
-        portfolioConfig,
-        null,
-        2
-      )}. Write a concise, personalized cover letter for the job description provided. 3 paragraphs max. Do not use generic phrases.`;
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 600,
-          system: systemPrompt,
-          messages: [
-            {
-              role: "user",
-              content: `Job Description: ${jobDescription}`,
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) throw new Error("API error");
-
-      let fullResponse = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const json = JSON.parse(line.slice(6));
-              if (json.type === "content_block_delta" && json.delta?.text) {
-                fullResponse += json.delta.text;
-                setCoverLetterOutput(fullResponse);
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Cover letter error:", error);
-      setCoverLetterOutput("Error generating cover letter. Please try again.");
-    } finally {
-      setCoverLetterLoading(false);
-    }
-  };
-
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(coverLetterOutput);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const wordCount = coverLetterOutput.split(/\s+/).filter((word) => word.length > 0).length;
 
   const handleCopyEmail = async () => {
     await navigator.clipboard.writeText(portfolioConfig.email);
@@ -515,74 +436,65 @@ export default function Contact() {
                 )}
               </div>
 
-              {/* Cover Letter Generator */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="border border-zinc-700 rounded-xl p-4 bg-zinc-800/30"
-              >
-                <button
-                  type="button"
-                  onClick={() => setShowCoverLetter(!showCoverLetter)}
-                  className="flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition"
-                >
-                  {showCoverLetter ? "▼" : "▶"} Generate Cover Letter
-                </button>
+              {/* Ask AI about Aziz Widget */}
+              {(() => {
+                const quickQuestions = [
+                  { 
+                    label: "Projects", 
+                    question: "Tell me about Aziz's key projects and what makes them technically impressive." 
+                  },
+                  { 
+                    label: "Experience", 
+                    question: "What is Aziz's professional experience and what has he built at Swisslog?" 
+                  },
+                  { 
+                    label: "Tech Stack", 
+                    question: "What technologies does Aziz specialize in and what is he strongest at?" 
+                  },
+                  { 
+                    label: "Work with Aziz", 
+                    question: "Why should I hire Aziz and what kind of roles suit him best?" 
+                  },
+                ];
 
-                {showCoverLetter && (
+                const handleQuickAsk = (question: string) => {
+                  window.dispatchEvent(
+                    new CustomEvent("open-ai-chat", { detail: question })
+                  );
+                };
+
+                return (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-4 space-y-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="rounded-xl border border-zinc-700 bg-zinc-800/30 p-4 space-y-3"
                   >
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-300 mb-2">
-                        Paste Job Description
-                      </label>
-                      <textarea
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                        placeholder="Paste the job description or role title here..."
-                        rows={4}
-                        className="w-full px-3 py-2 rounded-lg bg-zinc-700 text-white text-sm placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-                      />
+                    <p className="text-sm font-medium text-zinc-300">Ask AI about Aziz</p>
+                    <div className="flex flex-wrap gap-2">
+                      {quickQuestions.map((q) => (
+                        <motion.button
+                          key={q.label}
+                          type="button"
+                          onClick={() => handleQuickAsk(q.question)}
+                          className="px-3 py-1.5 rounded-full text-xs font-medium border border-zinc-600 
+                                     bg-zinc-800/50 text-zinc-300 hover:border-purple-500 
+                                     hover:bg-purple-500/10 hover:text-purple-300 transition-all"
+                          whileHover={{ 
+                            scale: 1.05, 
+                            boxShadow: "0 0 12px rgba(168, 85, 247, 0.3)" 
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {q.label}
+                        </motion.button>
+                      ))}
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={handleGenerateCoverLetter}
-                      disabled={coverLetterLoading || !jobDescription.trim()}
-                      className="w-full px-3 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-700 text-white text-sm font-medium transition"
-                    >
-                      {coverLetterLoading ? "Generating..." : "Generate Cover Letter"}
-                    </button>
-
-                    {coverLetterOutput && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-zinc-400">
-                            Word count: {wordCount}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={copyToClipboard}
-                            className="text-xs px-2 py-1 rounded bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 transition"
-                          >
-                            {copied ? "✓ Copied!" : "Copy"}
-                          </button>
-                        </div>
-                        <textarea
-                          readOnly
-                          value={coverLetterOutput}
-                          rows={5}
-                          className="w-full px-3 py-2 rounded-lg bg-zinc-700 text-zinc-200 text-sm resize-none focus:outline-none"
-                        />
-                      </div>
-                    )}
+                    <p className="text-xs text-zinc-500">
+                      Click any topic to ask the AI assistant instantly
+                    </p>
                   </motion.div>
-                )}
-              </motion.div>
+                );
+              })()}
 
               {/* Submit Button */}
               <motion.button

@@ -107,91 +107,95 @@ function ProjectCard({ project, variant = "default", index }: ProjectCardProps) 
     if (isTouchDevice) setIsFlipped(!isFlipped);
   };
 
-  const handleAskAi = async () => {
-    setShowAiPanel(true);
-    if (aiExplanation) return; // Already loaded
+ const handleAskAi = async () => {
+  setShowAiPanel(true);
+  if (aiExplanation) return;
 
-    setAiLoading(true);
-    setAiExplanation("");
+  setAiLoading(true);
+  setAiExplanation("");
 
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error("API key not configured");
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("API key not configured");
 
-      const systemPrompt =
-        "You are explaining one of Aziz's projects to a potential employer. Be technical but concise.";
-      const userPrompt = `Explain the ${project.title} project. Details: ${
-        project.longDescription || project.description
-      }. Technologies: ${project.technologies.join(", ")}. What problems did it solve and what was technically impressive?`;
+    const systemPrompt =
+      "You are explaining one of Aziz's projects to a potential employer. Be technical, concise, and clear.";
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const userPrompt = `Explain the ${project.title} project. Details: ${
+      project.longDescription || project.description
+    }. Technologies: ${project.technologies.join(
+      ", "
+    )}. What problems did it solve and what was technically impressive?`;
+
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "http://localhost:3000",
+          "X-OpenRouter-Title": "Aziz Portfolio Projects AI",
         },
         body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
+          model: "openai/gpt-4o-mini",
           max_tokens: 400,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userPrompt }],
-        }),
-      });
-
-      if (!response.ok) throw new Error("API error");
-
-      let fullResponse = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const json = JSON.parse(line.slice(6));
-              if (json.type === "content_block_delta" && json.delta?.text) {
-                fullResponse += json.delta.text;
-                setAiExplanation(fullResponse);
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("AI error:", error);
-      setAiExplanation("Error loading explanation. Please try again.");
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const handleFollowUpQuestion = async () => {
-    if (!followUpQuestion.trim()) return;
-
-    setFollowUpLoading(true);
-
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error("API key not configured");
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 400,
-          system: "You are answering a question about one of Aziz's projects. Be concise and technical.",
+          temperature: 0.5,
           messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("AI error:", response.status, errText);
+      throw new Error(`API error: ${response.status} ${errText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    setAiExplanation(content || "No explanation available.");
+  } catch (error) {
+    console.error("AI error:", error);
+    setAiExplanation("Error loading explanation. Please try again.");
+  } finally {
+    setAiLoading(false);
+  }
+};
+
+const handleFollowUpQuestion = async () => {
+  if (!followUpQuestion.trim()) return;
+
+  setFollowUpLoading(true);
+
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error("API key not configured");
+
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": "http://localhost:3000",
+          "X-OpenRouter-Title": "Aziz Portfolio Projects AI",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-4o-mini",
+          max_tokens: 400,
+          temperature: 0.5,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are answering a question about one of Aziz's projects. Be concise, technical, and clear.",
+            },
             {
               role: "user",
               content: `About the ${project.title} project (${project.technologies.join(
@@ -200,42 +204,29 @@ function ProjectCard({ project, variant = "default", index }: ProjectCardProps) 
             },
           ],
         }),
-      });
-
-      if (!response.ok) throw new Error("API error");
-
-      let followUpResponse = "";
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const json = JSON.parse(line.slice(6));
-              if (json.type === "content_block_delta" && json.delta?.text) {
-                followUpResponse += json.delta.text;
-                setAiExplanation((prev) => prev + "\n\n" + followUpResponse);
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
       }
+    );
 
-      setFollowUpQuestion("");
-    } catch (error) {
-      console.error("Follow-up error:", error);
-    } finally {
-      setFollowUpLoading(false);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Follow-up error:", response.status, errText);
+      throw new Error(`API error: ${response.status} ${errText}`);
     }
-  };
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (content) {
+      setAiExplanation((prev) => `${prev}\n\n${content}`);
+    }
+
+    setFollowUpQuestion("");
+  } catch (error) {
+    console.error("Follow-up error:", error);
+  } finally {
+    setFollowUpLoading(false);
+  }
+};
 
   const transformStyle: React.CSSProperties = isTouchDevice
     ? { perspective: "1000px", transformStyle: "preserve-3d" }
@@ -258,199 +249,6 @@ function ProjectCard({ project, variant = "default", index }: ProjectCardProps) 
     pointerEvents: "none",
     borderRadius: "inherit",
   };
-
-  return isTouchDevice ? (
-    <motion.div
-      ref={cardRef}
-      onClick={handleTap}
-      style={transformStyle}
-      className="relative cursor-pointer"
-      animate={{ rotateY: isFlipped ? 180 : 0 }}
-      transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 30 }}
-    >
-      <motion.div
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.5 }}
-        style={{ backfaceVisibility: "hidden" }}
-        className="w-full"
-      >
-        <Card className="relative overflow-hidden h-full project-card-hover-border rounded-2xl">
-          <div style={gradientStyle} />
-          {variant === "featured" ? (
-            <>
-              <h4 className="text-lg font-semibold text-white mb-2 relative z-10">
-                {project.title}
-              </h4>
-              <p className="text-zinc-300 mb-4 relative z-10">
-                {project.description}
-              </p>
-              <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-                {project.technologies.map((tech) => (
-                  <Badge key={tech} variant="secondary" className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-zinc-400 relative z-10">Tap to flip →</p>
-            </>
-          ) : (
-            <>
-              <h4 className="text-base font-semibold text-white mb-2 relative z-10">
-                {project.title}
-              </h4>
-              <p className="text-sm text-zinc-300 mb-3 relative z-10">
-                {project.description}
-              </p>
-              <div className="flex flex-wrap gap-1 mb-3 relative z-10">
-                {project.technologies.slice(0, 3).map((tech) => (
-                  <Badge key={tech} className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
-                {project.technologies.length > 3 && (
-                  <span className="text-xs text-zinc-500">
-                    +{project.technologies.length - 3}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-zinc-400 relative z-10">Tap to flip →</p>
-            </>
-          )}
-        </Card>
-      </motion.div>
-
-      <motion.div
-        animate={{ rotateY: isFlipped ? 0 : 180 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          backfaceVisibility: "hidden",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-        className="w-full"
-      >
-        <Card className="relative overflow-hidden h-full flex flex-col justify-between project-card-hover-border rounded-2xl">
-          <div>
-            <p className="text-sm text-zinc-300 mb-4 relative z-10">
-              {project.longDescription || project.description}
-            </p>
-          </div>
-          <div className="flex gap-2 relative z-10 flex-wrap">
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-purple-400 hover:text-purple-300 transition"
-              >
-                Code →
-              </a>
-            )}
-            {project.demo && (
-              <a
-                href={project.demo}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-400 hover:text-blue-300 transition"
-              >
-                Demo →
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={handleAskAi}
-              className="text-sm text-cyan-400 hover:text-cyan-300 transition"
-            >
-              Ask AI →
-            </button>
-          </div>
-        </Card>
-      </motion.div>
-    </motion.div>
-  ) : (
-    <div
-      ref={cardRef}
-      style={transformStyle}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onMouseEnter={handleMouseEnter}
-      className="relative"
-    >
-      <Card className="relative overflow-hidden project-card-hover-border rounded-2xl">
-        <div style={gradientStyle} />
-        {variant === "featured" ? (
-          <>
-            <h4 className="text-lg font-semibold text-white mb-2 relative z-10">
-              {project.title}
-            </h4>
-            <p className="text-zinc-300 mb-4 relative z-10">
-              {project.description}
-            </p>
-            <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-              {project.technologies.map((tech) => (
-                <Badge key={tech} variant="secondary" className="text-xs">
-                  {tech}
-                </Badge>
-              ))}
-            </div>
-            <div className="flex gap-2 relative z-10">
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-purple-400 hover:text-purple-300 transition"
-                >
-                  Code →
-                </a>
-              )}
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-400 hover:text-blue-300 transition"
-                >
-                  Demo →
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={handleAskAi}
-                className="text-sm text-cyan-400 hover:text-cyan-300 transition"
-              >
-                Ask AI →
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h4 className="text-base font-semibold text-white mb-2 relative z-10">
-              {project.title}
-            </h4>
-            <p className="text-sm text-zinc-300 mb-3 relative z-10">
-              {project.description}
-            </p>
-            <div className="flex flex-wrap gap-1 relative z-10">
-              {project.technologies.slice(0, 3).map((tech) => (
-                <Badge key={tech} className="text-xs">
-                  {tech}
-                </Badge>
-              ))}
-              {project.technologies.length > 3 && (
-                <span className="text-xs text-zinc-500">
-                  +{project.technologies.length - 3}
-                </span>
-              )}
-            </div>
-          </>
-        )}
-      </Card>
-    </div>
-  );
 
   return (
     <>
@@ -742,14 +540,16 @@ export default function Projects() {
       )}
 
       <SectionGrid>
-        {portfolioConfig.projects.map((project, index) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            variant="default"
-            index={index}
-          />
-        ))}
+        {portfolioConfig.projects
+          .filter((p) => !p.featured)
+          .map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              variant="default"
+              index={index}
+            />
+          ))}
       </SectionGrid>
     </div>
   );
