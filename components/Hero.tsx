@@ -122,7 +122,7 @@ export default function Hero() {
 
   const handleResumeDownload = () => {
     const link = document.createElement("a");
-    link.href = "/resume.pdf";
+    link.href = "/Lebenslauf_.pdf";
     link.download = "Aziz_Resume.pdf";
     document.body.appendChild(link);
     link.click();

@@ -19,13 +19,13 @@ export const portfolioConfig: PortfolioConfig = {
       label: "LinkedIn",
     },
     {
-      platform: "twitter",
-      url: "https://twitter.com",
-      label: "Twitter",
+      platform: "X",
+      url: "https://x.com/mansour_tn5",
+      label: "X",
     },
     {
       platform: "resume",
-      url: "/resume.pdf",
+      url: "/Lebenslauf_.pdf",
       label: "Resume",
     },
   ],
@@ -71,7 +71,7 @@ export const portfolioConfig: PortfolioConfig = {
     {
       id: "thesis",
       role: "Bachelor Thesis – YOLO Object Detection for Robotics",
-      company: "THGA (Technische Hochschule Geislingen)",
+      company: "Technische Hochschule Georg Agricola (THGA)",
       period: "2025",
       startDate: new Date("2024-06-01"),
       endDate: new Date("2025-03-01"),
@@ -83,7 +83,25 @@ export const portfolioConfig: PortfolioConfig = {
         "Achieved 95%+ detection accuracy with <50ms latency",
       ],
       type: "thesis",
+      location: "Germany",
     },
+  {
+    id: "thga-tutor",
+    role: "Student Tutor – Information & Digital Technology",
+    company: "Technische Hochschule Georg Agricola (THGA)",
+    period: "Sep 2024 – Feb 2025",
+    startDate: new Date("2024-09-01"),
+    endDate: new Date("2025-02-01"),
+    description:
+      "Supported undergraduate students in Computer Science and Digital Technology courses by explaining core programming and digital systems concepts, assisting with exercises, and helping students strengthen their technical foundations.",
+    highlights: [
+      "Tutored students in Informatik and Digitaltechnik courses",
+      "Explained programming, algorithms, and digital systems concepts",
+      "Assisted students with assignments and problem-solving",
+    ],
+    type: "teaching",
+    location: "Germany",
+  },
   ],
 
   projects: [
@@ -109,7 +127,7 @@ export const portfolioConfig: PortfolioConfig = {
     },
     {
       id: "itempiQ",
-      title: "ItemPiQ Support Agent",
+      title: "AI-Powered Autonomous Support Agent",
       description:
         "AI-powered assistant with WebSocket streaming and role-based access control.",
       longDescription:
@@ -117,6 +135,24 @@ export const portfolioConfig: PortfolioConfig = {
       technologies: ["Python", "FastAPI", "WebSockets", "React", "Next.js"],
       featured: true,
     },
+    {
+  id: "itempiq-remediation",
+  title: "Autonomous Remediation & Teams Alert System",
+  description:
+    "AI-powered monitoring and remediation system for industrial robotics with Microsoft Teams alert integration.",
+  longDescription:
+    "Designed and implemented an autonomous remediation system for the ItemPiQ robotic picking platform. The system continuously monitors system health, container states, and operational logs, automatically diagnosing issues using an AI agent and triggering remediation actions. Integrated Microsoft Teams alerts with structured incident reports and actionable diagnostics, enabling faster response and improved operational reliability in production environments.",
+  technologies: [
+    "Python",
+    "FastAPI",
+    "Docker",
+    "LLM Agents",
+    "Microsoft Teams Webhooks",
+    "MQTT",
+    "Elasticsearch"
+  ],
+  featured: true,
+},
   ],
 
   testimonials: [

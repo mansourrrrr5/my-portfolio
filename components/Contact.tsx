@@ -311,7 +311,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                 {portfolioConfig.socials.map((social) => (
                   <motion.a
                     key={social.platform}
-                    href={social.platform === "resume" ? "/resume.pdf" : social.url}
+                    href={social.platform === "resume" ? "/Lebenslauf_.pdf" : social.url}
                     target={social.platform === "resume" ? undefined : "_blank"}
                     rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
                     download={social.platform === "resume" ? true : undefined}

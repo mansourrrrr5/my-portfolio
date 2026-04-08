@@ -18,7 +18,7 @@ export interface Experience {
   description: string;
   highlights?: string[];
   location?: string;
-  type?: "work" | "thesis" | "education";
+  type?: "work" | "thesis" | "education"| "teaching" | "other";
 }
 
 export interface Project {
@@ -43,7 +43,7 @@ export interface Testimonial {
 }
 
 export interface SocialLink {
-  platform: "github" | "linkedin" | "twitter" | "email" | "resume";
+  platform: "github" | "linkedin" | "X" | "email" | "resume";
   url: string;
   label: string;
   icon?: string;
