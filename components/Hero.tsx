@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { portfolioConfig } from "@/data/content";
 import { useTypewriter } from "@/hooks/useTypewriter";
+import { DottedSurface } from "@/components/ui/dotted-surface";
 import { useState, useRef, useEffect } from "react";
 
 const titles = ["Software Engineer", "AI Specialist", "Computer Vision Engineer"];
@@ -201,29 +202,38 @@ export default function Hero() {
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-[90vh] flex items-center justify-between pt-20 md:pt-32"
+      className="relative overflow-hidden min-h-[90vh] w-screen -ml-[calc(50vw-50%)] bg-zinc-950"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Background layer - full width and height */}
+      <div className="absolute inset-0 z-0">
+        <DottedSurface className="w-full h-full" />
+      </div>
+      
+      {/* Subtle background particles - reduced */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className={`absolute pointer-events-none ${particle.color}`}
+            style={{
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              borderRadius: '50%',
+              opacity: 0.08,
+            }}
+          />
+        ))}
+      </div>
+
       <style>{getHeroStyles(reducedMotion)}</style>
 
-      {/* Subtle background particles - reduced */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className={`absolute pointer-events-none ${particle.color}`}
-          style={{
-            left: `${particle.left}%`,
-            top: `${particle.top}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            borderRadius: '50%',
-            opacity: 0.08,
-          }}
-        />
-      ))}
-
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-6 md:gap-16 md:grid-cols-2">
+      {/* Content layer - centered with max-width constraint */}
+      <div className="relative z-10 flex items-center justify-center pt-28 pb-20 md:pt-52 md:pb-24">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-6 md:gap-16 md:grid-cols-2">
         {/* LEFT SIDE - Content */}
         <motion.div
           className="space-y-8"
@@ -389,6 +399,7 @@ export default function Hero() {
           </div>
         </motion.div>
       </div>
+        </div>
     </section>
   );
 }
