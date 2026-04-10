@@ -236,15 +236,32 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
     setStatus("loading");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+
       setStatus("success");
       setEmail("");
       setMessage("");
+      setMessageCharCount(0);
       setEmailError("");
       setMessageError("");
       setTimeout(() => setStatus("idle"), 3000);
     } catch (error) {
+      console.error("Error sending message:", error);
       setStatus("error");
+      setMessageError("Failed to send message. Please try again.");
       setTimeout(() => setStatus("idle"), 3000);
     }
   };
