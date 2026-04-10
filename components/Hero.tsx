@@ -321,7 +321,7 @@ export default function Hero() {
                 }
                 target={social.platform === "resume" ? undefined : "_blank"}
                 rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
-                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-white transition-colors backdrop-blur-sm"
+                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 bg-zinc-900/30 hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-white transition-colors backdrop-blur-sm"
                 whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
                 whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
               >
