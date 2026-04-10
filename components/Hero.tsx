@@ -7,7 +7,7 @@ import { useTypewriter } from "@/hooks/useTypewriter";
 import { DottedSurface } from "@/components/ui/dotted-surface";
 import { useState, useRef, useEffect } from "react";
 
-const titles = ["Software Engineer", "AI Specialist", "Computer Vision Engineer"];
+const titles = ["Software Engineer", "AI Specialist", "IT Engineer"];
 
 // CSS animations for Hero effects - minimal and elegant
 const getHeroStyles = (reducedMotion: boolean) => `
@@ -232,7 +232,7 @@ export default function Hero() {
       <style>{getHeroStyles(reducedMotion)}</style>
 
       {/* Content layer - centered with max-width constraint */}
-      <div className="relative z-10 flex items-center justify-center pt-28 pb-20 md:pt-52 md:pb-24">
+      <div className="relative z-10 flex items-center justify-center pt-28 pb-20 md:pt-32 md:pb-24">
         <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-6 md:gap-16 md:grid-cols-2">
         {/* LEFT SIDE - Content */}
         <motion.div
@@ -321,7 +321,7 @@ export default function Hero() {
                 }
                 target={social.platform === "resume" ? undefined : "_blank"}
                 rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
-                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-white transition-colors"
+                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-white transition-colors backdrop-blur-sm"
                 whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
                 whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
               >
