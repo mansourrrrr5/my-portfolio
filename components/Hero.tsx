@@ -287,7 +287,7 @@ export default function Hero() {
             transition={{ delay: reducedMotion ? 0 : 0.4, duration: reducedMotion ? 0 : 0.6 }}
           >
             <p className="text-lg md:text-xl text-zinc-300 leading-relaxed max-w-lg">
-              <span className="font-semibold text-white">{typewriterText}</span> building intelligent systems and scalable applications that push the boundaries of what's possible.
+              <span className="font-semibold text-white">{typewriterText}</span> building intelligent  and scalable applications that push the boundaries of what's possible.
             </p>
 
             {/* Specialties */}
