@@ -6,6 +6,7 @@ import CursorFollower from "@/components/CursorFollower";
 import BackToTop from "@/components/BackToTop";
 import AiChat from "@/components/AiChat";
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,6 +80,7 @@ export default function RootLayout({
           <AiChat />
           <BackToTop />
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
