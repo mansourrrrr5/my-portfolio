@@ -64,7 +64,7 @@ export const en = {
     subtitle: "How I approach software development",
   },
   contact: {
-    title: "Let's build something amazing",
+    title: "Get In Touch",
     subtitle: "Get in touch",
     description:
       "Have a project in mind? Let's collaborate and create something extraordinary together.",

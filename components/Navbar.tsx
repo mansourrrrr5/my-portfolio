@@ -57,9 +57,9 @@ export default function Navbar() {
     : "en";
 
   const languages = [
-    { code: "en", label: "English", flag: "🇺🇸" },
-    { code: "de", label: "Deutsch", flag: "🇩🇪" },
-    { code: "fr", label: "Français", flag: "🇫🇷" },
+    { code: "en", label: "EN", flag: "🇺🇸" },
+    { code: "de", label: "DE", flag: "🇩🇪" },
+    { code: "fr", label: "FR", flag: "🇫🇷" },
   ];
 
   const switchLanguage = (locale: string) => {

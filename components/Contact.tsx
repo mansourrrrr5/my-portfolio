@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import type { PortfolioConfig } from "@/types";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { ContactSocialButton } from "@/components/ui/contact-social-button";
 
 interface ContactProps {
   config: PortfolioConfig;
@@ -330,19 +331,13 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
               <p className="text-sm text-zinc-400 mb-3">Follow</p>
               <div className="flex flex-wrap gap-3">
                 {config.socials.map((social: any) => (
-                  <motion.a
+                  <ContactSocialButton
                     key={social.platform}
-                    href={social.platform === "resume" ? "/Lebenslauf_.pdf" : social.url}
-                    target={social.platform === "resume" ? undefined : "_blank"}
-                    rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
-                    download={social.platform === "resume" ? true : undefined}
-                    className="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-800/50 hover:border-blue-500 hover:bg-blue-500/10 transition text-sm text-zinc-300 hover:text-blue-300 will-change-transform"
-                    aria-label={social.label}
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)" }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {social.label}
-                  </motion.a>
+                    platform={social.platform}
+                    url={social.platform === "resume" ? "/Lebenslauf_.pdf" : social.url}
+                    label={social.label}
+                    isResume={social.platform === "resume"}
+                  />
                 ))}
               </div>
             </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { DottedSurface } from "@/components/ui/dotted-surface";
+import { HeroSocialButton } from "@/components/ui/hero-social-button";
 import { useState, useRef, useEffect } from "react";
 import type { PortfolioConfig } from "@/types";
 
@@ -302,36 +303,29 @@ export default function Hero({ config }: HeroProps) {
 
           {/* Social Links */}
           <motion.div
-            className="flex gap-2 flex-wrap"
+            className="flex gap-3 flex-wrap items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reducedMotion ? 0 : 0.5, duration: reducedMotion ? 0 : 0.5 }}
           >
-            {config.socials.map((social: any) => (
-              <motion.a
-                key={social.platform}
-                href={
-                  social.platform === "resume"
-                    ? "javascript:void(0)"
-                    : social.url
-                }
-                onClick={
-                  social.platform === "resume"
-                    ? (e) => {
-                        e.preventDefault();
-                        handleResumeDownload();
-                      }
-                    : undefined
-                }
-                target={social.platform === "resume" ? undefined : "_blank"}
-                rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
-                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 bg-zinc-900/80 hover:border-zinc-600 hover:bg-zinc-900/90 hover:text-white transition-colors backdrop-blur-lg"
-                whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
-                whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
-              >
-                {social.label}
-              </motion.a>
-            ))}
+            <HeroSocialButton
+              platform="github"
+              url="https://github.com/mansourrrrr5"
+              label="Visit GitHub"
+              reducedMotion={reducedMotion}
+            />
+            <HeroSocialButton
+              platform="linkedin"
+              url="https://www.linkedin.com/in/mohamed-aziz-mansour-5a39b2278/"
+              label="Visit LinkedIn"
+              reducedMotion={reducedMotion}
+            />
+            <HeroSocialButton
+              platform="x"
+              url="https://x.com/mansour_tn5"
+              label="Follow on X"
+              reducedMotion={reducedMotion}
+            />
           </motion.div>
 
           {/* CTA Buttons */}
