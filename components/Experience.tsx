@@ -2,7 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { portfolioConfig } from "@/data/content";
+import type { PortfolioConfig } from "@/types";
+
+interface ExperienceProps {
+  config: PortfolioConfig;
+}
 
 const pulseStyles = `
   @keyframes timeline-pulse {
@@ -51,7 +55,7 @@ const pulseStyles = `
   }
 `;
 
-export default function Experience() {
+export default function Experience({ config }: ExperienceProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -75,7 +79,7 @@ export default function Experience() {
         />
 
         {/* Experience entries */}
-        {portfolioConfig.experiences.map((exp, index) => {
+        {config.experiences.map((exp, index) => {
           const isCurrent = isCurrentExperience(exp.period);
 
           return (

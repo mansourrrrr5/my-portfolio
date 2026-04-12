@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
@@ -39,11 +40,49 @@ const scrollProgressStyles = `
 `;
 
 export default function Navbar() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [active, setActive] = useState("#about");
   const [hasScrolled, setHasScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+
+  // Extract current locale from pathname
+  const currentLocale = pathname.startsWith("/de")
+    ? "de"
+    : pathname.startsWith("/fr")
+    ? "fr"
+    : "en";
+
+  const languages = [
+    { code: "en", label: "English", flag: "🇺🇸" },
+    { code: "de", label: "Deutsch", flag: "🇩🇪" },
+    { code: "fr", label: "Français", flag: "🇫🇷" },
+  ];
+
+  const switchLanguage = (locale: string) => {
+    let newPath = pathname;
+    
+    // Remove current locale prefix
+    if (pathname.startsWith("/de/") || pathname.startsWith("/de")) {
+      newPath = pathname.replace(/^\/de/, "") || "/";
+    } else if (pathname.startsWith("/fr/") || pathname.startsWith("/fr")) {
+      newPath = pathname.replace(/^\/fr/, "") || "/";
+    } else if (pathname.startsWith("/en/") || pathname.startsWith("/en")) {
+      newPath = pathname.replace(/^\/en/, "") || "/";
+    }
+
+    // Add new locale prefix (except for English at root)
+    if (locale === "en") {
+      router.push(newPath || "/");
+    } else {
+      router.push(`/${locale}${newPath}`);
+    }
+
+    setIsLangMenuOpen(false);
+  };
 
   useEffect(() => {
     // Set up IntersectionObserver for section tracking
@@ -136,6 +175,82 @@ export default function Navbar() {
               {item.name}
             </a>
           ))}
+
+          {/* Language Separator */}
+          <div className="w-px h-5 bg-zinc-700" />
+
+          {/* Language Switcher */}
+          <div className="relative">
+            <motion.button
+              onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+              className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors px-2 py-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-lg">
+                {languages.find((l) => l.code === currentLocale)?.flag}
+              </span>
+              <span className="hidden md:inline">
+                {languages.find((l) => l.code === currentLocale)?.label}
+              </span>
+              <svg
+                className={`w-4 h-4 transition-transform ${
+                  isLangMenuOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </motion.button>
+
+            {/* Language Dropdown Menu */}
+            <AnimatePresence>
+              {isLangMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl overflow-hidden z-50"
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => switchLanguage(lang.code)}
+                      className={`w-full px-4 py-2 text-sm font-medium text-left transition-colors flex items-center gap-2 whitespace-nowrap ${
+                        currentLocale === lang.code
+                          ? "bg-purple-900/50 text-white"
+                          : "text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                      }`}
+                    >
+                      <span className="text-base">{lang.flag}</span>
+                      {lang.label}
+                      {currentLocale === lang.code && (
+                        <svg
+                          className="w-4 h-4 ml-auto"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -220,6 +335,33 @@ export default function Navbar() {
                     {item.name}
                   </a>
                 ))}
+
+                {/* Language Separator */}
+                <div className="h-px bg-zinc-800" />
+
+                {/* Mobile Language Switcher */}
+                <div className="px-6 py-4">
+                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                    Language
+                  </p>
+                  <div className="flex gap-2">
+                    {languages.map((lang) => (
+                      <motion.button
+                        key={lang.code}
+                        onClick={() => switchLanguage(lang.code)}
+                        className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+                          currentLocale === lang.code
+                            ? "bg-purple-600 text-white"
+                            : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                        }`}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span className="text-base block mb-1">{lang.flag}</span>
+                        {lang.label}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
               </nav>
             </motion.div>
           </>

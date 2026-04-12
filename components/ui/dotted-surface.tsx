@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // @ts-ignore - three library types
 import * as THREE from 'three';
 
@@ -9,21 +9,39 @@ type DottedSurfaceProps = Omit<React.ComponentProps<'div'>, 'ref'>;
 
 export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 	const { theme } = useTheme();
+	const [isMounted, setIsMounted] = useState(false);
 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const sceneRef = useRef<any>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
 	useEffect(() => {
-		if (!containerRef.current) return;
+		setIsMounted(true);
+	}, []);
+
+	useEffect(() => {
+		if (!isMounted || !containerRef.current) return;
+		
+		// Wait for container to have dimensions
+		const containerWidth = containerRef.current.clientWidth;
+		const containerHeight = containerRef.current.clientHeight;
+		
+		if (containerWidth === 0 || containerHeight === 0) {
+			// Schedule retry if dimensions aren't ready yet
+			const timeout = setTimeout(() => {
+				const event = new Event('resize');
+				window.dispatchEvent(event);
+			}, 100);
+			return () => clearTimeout(timeout);
+		}
 
 		const SEPARATION = 150;
 		const AMOUNTX = 40;
 		const AMOUNTY = 60;
 
 		// Get container dimensions
-		const width = containerRef.current.clientWidth;
-		const height = containerRef.current.clientHeight;
+		const width = containerWidth;
+		const height = containerHeight;
 
 		// Scene setup
 		const scene = new THREE.Scene();
@@ -183,7 +201,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 				}
 			}
 		};
-	}, [theme]);
+	}, [theme, isMounted]);
 
 	return (
 		<div

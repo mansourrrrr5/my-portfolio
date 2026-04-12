@@ -1,10 +1,14 @@
 "use client";
 
-import { portfolioConfig } from "@/data/content";
+import type { PortfolioConfig, Testimonial } from "@/types";
 import { Card, SectionGrid } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+
+interface TestimonialsProps {
+  config: PortfolioConfig;
+}
 
 const testimonialStyles = `
   @keyframes star-pop {
@@ -58,7 +62,7 @@ const testimonialStyles = `
 `;
 
 interface TestimonialCardProps {
-  testimonial: (typeof portfolioConfig.testimonials)[0];
+  testimonial: Testimonial;
   index: number;
 }
 
@@ -113,7 +117,7 @@ function CarouselTestimonial({
   testimonial,
   isActive,
 }: {
-  testimonial: (typeof portfolioConfig.testimonials)[0];
+  testimonial: Testimonial;
   isActive: boolean;
 }) {
   return (
@@ -164,7 +168,7 @@ function CarouselTestimonial({
   );
 }
 
-export default function Testimonials() {
+export default function Testimonials({ config }: TestimonialsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 
@@ -173,7 +177,7 @@ export default function Testimonials() {
     if (isHovering) return; // Pause on hover
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % portfolioConfig.testimonials.length);
+      setCurrentIndex((prev) => (prev + 1) % config.testimonials.length);
     }, 4000);
 
     return () => clearInterval(interval);
@@ -195,7 +199,7 @@ export default function Testimonials() {
         >
           {/* Carousel container */}
           <div className="relative h-full">
-            {portfolioConfig.testimonials.map((testimonial, index) => (
+            {config.testimonials.map((testimonial, index) => (
               <CarouselTestimonial
                 key={testimonial.id}
                 testimonial={testimonial}
@@ -207,7 +211,7 @@ export default function Testimonials() {
 
         {/* Dot indicators */}
         <div className="flex justify-center gap-2 mt-6">
-          {portfolioConfig.testimonials.map((_, index) => (
+          {config.testimonials.map((_, index) => (
             <button
               key={index}
               className={`carousel-dot ${index === currentIndex ? "active" : ""}`}
@@ -221,7 +225,7 @@ export default function Testimonials() {
       {/* Desktop Grid (md and above) */}
       <div className="hidden md:block">
         <SectionGrid cols={2}>
-          {portfolioConfig.testimonials.map((testimonial, index) => (
+          {config.testimonials.map((testimonial, index) => (
             <TestimonialCard
               key={testimonial.id}
               testimonial={testimonial}

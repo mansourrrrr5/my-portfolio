@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { portfolioConfig } from "@/data/content";
+import type { PortfolioConfig } from "@/types";
+
+interface SkillsProps {
+  config: PortfolioConfig;
+}
 
 const focusAreas = [
   {
@@ -99,7 +103,7 @@ function FocusCard({ title, icon, color, tags, proof }: FocusCardProps) {
   );
 }
 
-function SkillMatcher() {
+function SkillMatcher({ config }: { config: PortfolioConfig }) {
   const [roleDescription, setRoleDescription] = useState("");
   const [matchResults, setMatchResults] = useState<{
     matched: string[];
@@ -119,7 +123,7 @@ function SkillMatcher() {
       const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
       if (!apiKey) throw new Error("API key not configured");
 
-      const skillsJson = JSON.stringify(portfolioConfig.skills);
+      const skillsJson = JSON.stringify(config.skills);
 
       const systemPrompt = `You are analyzing job requirements against a developer's skills.
 
@@ -330,7 +334,7 @@ Rules:
     </div>
   );
 }
-export default function Skills() {
+export default function Skills({ config }: SkillsProps) {
   // Extract all unique tags from focusAreas
   const allTags = Array.from(new Set(focusAreas.flatMap((area) => area.tags))).sort();
 
@@ -372,7 +376,7 @@ export default function Skills() {
       </div>
 
       {/* Section 3 - AI Skill Analyzer */}
-      <SkillMatcher />
+      <SkillMatcher config={config} />
     </div>
   );
 }

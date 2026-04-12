@@ -2,9 +2,13 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { portfolioConfig } from "@/data/content";
+import type { PortfolioConfig, Project } from "@/types";
 import { Card, Badge, SectionGrid } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+interface ProjectsProps {
+  config: PortfolioConfig;
+}
 
 const projectStyles = `
   @property --angle {
@@ -43,7 +47,7 @@ interface TiltState {
 }
 
 interface ProjectCardProps {
-  project: (typeof portfolioConfig.projects)[0];
+  project: Project;
   variant?: "featured" | "default";
   index: number;
 }
@@ -515,8 +519,8 @@ const handleFollowUpQuestion = async () => {
   );
 }
 
-export default function Projects() {
-  const featuredProjects = portfolioConfig.projects.filter((p) => p.featured);
+export default function Projects({ config }: ProjectsProps) {
+  const featuredProjects = config.projects.filter((p) => p.featured);
 
   return (
     <div className="space-y-8">
@@ -540,7 +544,7 @@ export default function Projects() {
       )}
 
       <SectionGrid>
-        {portfolioConfig.projects
+        {config.projects
           .filter((p) => !p.featured)
           .map((project, index) => (
             <ProjectCard

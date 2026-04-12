@@ -1,10 +1,14 @@
 "use client";
 
 import React from "react";
-import { portfolioConfig } from "@/data/content";
 import { Card, Badge } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
+import type { PortfolioConfig } from "@/types";
+
+interface AboutProps {
+  config: PortfolioConfig;
+}
 
 function StatsSection() {
   const { ref, className } = useScrollReveal({
@@ -58,7 +62,7 @@ function StatsSection() {
   );
 }
 
-export default function About() {
+export default function About({ config }: AboutProps) {
   const { ref: textRef, className: textClassName } = useScrollReveal({
     threshold: 0.3,
   });
@@ -68,7 +72,7 @@ export default function About() {
   });
 
   // Group skills by category
-  const skillsByCategory = portfolioConfig.skills.reduce(
+  const skillsByCategory = config.skills.reduce(
     (acc, skill) => {
       if (!acc[skill.category]) {
         acc[skill.category] = [];
@@ -76,7 +80,7 @@ export default function About() {
       acc[skill.category].push(skill);
       return acc;
     },
-    {} as Record<string, typeof portfolioConfig.skills>
+    {} as Record<string, typeof config.skills>
   );
 
   return (
@@ -94,7 +98,7 @@ export default function About() {
             <Card>
               <div className="flex flex-col gap-4">
                 <p className="text-zinc-300 text-lg leading-relaxed">
-                  {portfolioConfig.description}
+                  {config.description}
                 </p>
                 <p className="text-zinc-400 leading-relaxed">
                   I currently work as a Working Student IT in Robotics R&D at

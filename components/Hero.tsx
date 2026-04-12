@@ -2,10 +2,14 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { portfolioConfig } from "@/data/content";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { DottedSurface } from "@/components/ui/dotted-surface";
 import { useState, useRef, useEffect } from "react";
+import type { PortfolioConfig } from "@/types";
+
+interface HeroProps {
+  config: PortfolioConfig;
+}
 
 const titles = ["Software Engineer", "AI Specialist", "IT Engineer"];
 
@@ -85,7 +89,7 @@ function generateParticles(count: number) {
 // Specialties list
 const specialties = ["Computer Vision", "AI Systems", "Full-Stack Development"];
 
-export default function Hero() {
+export default function Hero({ config }: HeroProps) {
   const [particles] = useState(() => generateParticles(8));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const button1Ref = useRef<HTMLAnchorElement>(null);
@@ -197,7 +201,7 @@ export default function Hero() {
     };
   }, []);
 
-  const nameLetters = portfolioConfig.name.split("");
+  const nameLetters = config.name.split("");
 
   return (
     <section 
@@ -303,7 +307,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reducedMotion ? 0 : 0.5, duration: reducedMotion ? 0 : 0.5 }}
           >
-            {portfolioConfig.socials.map((social) => (
+            {config.socials.map((social: any) => (
               <motion.a
                 key={social.platform}
                 href={
@@ -321,7 +325,7 @@ export default function Hero() {
                 }
                 target={social.platform === "resume" ? undefined : "_blank"}
                 rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
-                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 bg-zinc-900/30 hover:border-zinc-600 hover:bg-zinc-900/50 hover:text-white transition-colors backdrop-blur-sm"
+                className="px-4 py-2 text-xs font-medium border border-zinc-700 rounded-lg text-zinc-300 bg-zinc-900/80 hover:border-zinc-600 hover:bg-zinc-900/90 hover:text-white transition-colors backdrop-blur-lg"
                 whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
                 whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
               >
@@ -341,7 +345,7 @@ export default function Hero() {
             <motion.a
               ref={button1Ref}
               href="#projects"
-              className="magnetic-button relative group rounded-xl border border-purple-500/50 bg-gradient-to-r from-purple-600/30 to-blue-600/30 px-7 py-3.5 text-sm font-semibold text-purple-300 hover:border-purple-400 hover:from-purple-600/50 hover:to-blue-600/50 transition-all shimmer-button overflow-hidden backdrop-blur-sm"
+              className="magnetic-button relative group rounded-xl border border-purple-500/50 bg-gradient-to-r from-purple-600/60 to-blue-600/60 px-7 py-3.5 text-sm font-semibold text-purple-300 hover:border-purple-400 hover:from-purple-600/70 hover:to-blue-600/70 transition-all shimmer-button overflow-hidden backdrop-blur-lg"
               style={{ transform: button1Transform }}
               onMouseMove={(e) => handleButtonMouseMove(e, button1Ref, setButton1Transform)}
               onMouseLeave={() => handleButtonMouseLeave(setButton1Transform)}
@@ -356,7 +360,7 @@ export default function Hero() {
             <motion.a
               ref={button2Ref}
               href="#contact"
-              className="magnetic-button relative rounded-xl border border-zinc-600 bg-zinc-900/30 px-7 py-3.5 text-sm font-semibold text-white hover:border-zinc-500 hover:bg-zinc-900/60 transition-all backdrop-blur-sm"
+              className="magnetic-button relative rounded-xl border border-zinc-600 bg-zinc-900/80 px-7 py-3.5 text-sm font-semibold text-white hover:border-zinc-500 hover:bg-zinc-900/90 transition-all backdrop-blur-lg"
               style={{ transform: button2Transform }}
               onMouseMove={(e) => handleButtonMouseMove(e, button2Ref, setButton2Transform)}
               onMouseLeave={() => handleButtonMouseLeave(setButton2Transform)}

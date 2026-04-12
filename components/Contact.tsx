@@ -2,8 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { portfolioConfig } from "@/data/content";
+import type { PortfolioConfig } from "@/types";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+interface ContactProps {
+  config: PortfolioConfig;
+}
 
 const contactStyles = `
   .contact-blob {
@@ -54,7 +58,7 @@ const contactStyles = `
 const MAX_MESSAGE_LENGTH = 500;
 const MIN_MESSAGE_LENGTH = 10;
 
-export default function Contact() {
+export default function Contact({ config }: ContactProps) {
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -212,7 +216,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
   };
 
   const handleCopyEmail = async () => {
-    await navigator.clipboard.writeText(portfolioConfig.email);
+    await navigator.clipboard.writeText(config.email);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -305,10 +309,10 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
               <p className="text-sm text-zinc-400 mb-2">Email</p>
               <div className="flex items-center gap-3">
                 <a
-                  href={`mailto:${portfolioConfig.email}`}
+                  href={`mailto:${config.email}`}
                   className="text-purple-400 hover:text-purple-300 transition text-lg font-medium"
                 >
-                  {portfolioConfig.email}
+                  {config.email}
                 </a>
                 <button
                   onClick={handleCopyEmail}
@@ -325,7 +329,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
             <div className="space-y-3">
               <p className="text-sm text-zinc-400 mb-3">Follow</p>
               <div className="flex flex-wrap gap-3">
-                {portfolioConfig.socials.map((social) => (
+                {config.socials.map((social: any) => (
                   <motion.a
                     key={social.platform}
                     href={social.platform === "resume" ? "/Lebenslauf_.pdf" : social.url}
