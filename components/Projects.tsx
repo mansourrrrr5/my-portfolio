@@ -521,7 +521,7 @@ const handleFollowUpQuestion = async () => {
   );
 }
 
-export default function Projects({ config }: ProjectsProps) {
+export default function Projects({ config, dict }: ProjectsProps) {
   const featuredProjects = config.projects.filter((p) => p.featured);
 
   return (

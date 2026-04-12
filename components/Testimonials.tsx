@@ -1,6 +1,7 @@
 "use client";
 
 import type { PortfolioConfig, Testimonial } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 import { Card, SectionGrid } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +9,7 @@ import { useState, useEffect } from "react";
 
 interface TestimonialsProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
 const testimonialStyles = `
@@ -168,7 +170,7 @@ function CarouselTestimonial({
   );
 }
 
-export default function Testimonials({ config }: TestimonialsProps) {
+export default function Testimonials({ config, dict }: TestimonialsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 

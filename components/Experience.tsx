@@ -3,9 +3,11 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import type { PortfolioConfig } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 
 interface ExperienceProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
 const pulseStyles = `
@@ -55,7 +57,7 @@ const pulseStyles = `
   }
 `;
 
-export default function Experience({ config }: ExperienceProps) {
+export default function Experience({ config, dict }: ExperienceProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,

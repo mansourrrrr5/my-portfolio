@@ -256,16 +256,16 @@ export default function Page({ params }: PageProps) {
             </Section>
 
             <Section id="experience" title={dict.experience.title}>
-              <Experience config={portfolioConfig} />
+              <Experience config={portfolioConfig} dict={dict} />
             </Section>
 
             <Section id="projects" title={dict.projects.title}>
-              <Projects config={portfolioConfig} />
+              <Projects config={portfolioConfig} dict={dict} />
             </Section>
 
             <Section id="testimonials" title={dict.testimonials.title}>
               <Suspense fallback={<SectionSkeleton />}>
-                <Testimonials config={portfolioConfig} />
+                <Testimonials config={portfolioConfig} dict={dict} />
               </Suspense>
             </Section>
 
