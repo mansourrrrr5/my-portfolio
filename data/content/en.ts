@@ -67,6 +67,7 @@ export const portfolioConfig: PortfolioConfig = {
       ],
       location: "Germany",
       type: "work",
+      image: "/swisslog.jpg",
     },
     {
       id: "thesis",
@@ -84,6 +85,7 @@ export const portfolioConfig: PortfolioConfig = {
       ],
       type: "thesis",
       location: "Germany",
+      image: "/bachelor.jpeg",
     },
     {
       id: "thga-tutor",
@@ -101,6 +103,7 @@ export const portfolioConfig: PortfolioConfig = {
       ],
       type: "teaching",
       location: "Germany",
+      image: "/thga.jpg",
     },
   ],
 

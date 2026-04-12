@@ -19,6 +19,7 @@ export interface Experience {
   highlights?: string[];
   location?: string;
   type?: "work" | "thesis" | "education"| "teaching" | "other";
+  image?: string;
 }
 
 export interface Project {

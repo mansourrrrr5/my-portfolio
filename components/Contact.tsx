@@ -23,8 +23,8 @@ const contactStyles = `
   }
 
   .contact-input:focus {
-    border-color: #a855f7;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     outline: none;
   }
 
@@ -283,8 +283,8 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
         transition={{ duration: 0.6 }}
       >
         {/* Decorative gradient blobs */}
-        <div className="contact-blob gradient-blob absolute -top-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
-        <div className="contact-blob gradient-blob absolute -bottom-20 -right-20 w-60 h-60 bg-blue-500/20 rounded-full blur-3xl" style={{ animationDelay: "1s" }} />
+        <div className="contact-blob gradient-blob absolute -top-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="contact-blob gradient-blob absolute -bottom-20 -right-20 w-60 h-60 bg-cyan-500/20 rounded-full blur-3xl" style={{ animationDelay: "1s" }} />
 
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
           {/* LEFT COLUMN — Info Panel */}
@@ -295,7 +295,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 Let's build something amazing
               </span>
             </h2>
@@ -310,15 +310,15 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
               <div className="flex items-center gap-3">
                 <a
                   href={`mailto:${config.email}`}
-                  className="text-purple-400 hover:text-purple-300 transition text-lg font-medium"
+                  className="text-blue-400 hover:text-blue-300 transition text-lg font-medium"
                 >
                   {config.email}
                 </a>
                 <button
                   onClick={handleCopyEmail}
-                  className="px-3 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/20 transition text-xs text-purple-400 font-medium"
+                  className="px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 hover:border-blue-500 hover:bg-blue-500/20 transition text-xs text-blue-400 font-medium"
                   aria-label="Copy email address to clipboard"
-                  title={copied ? "Copied!" : "Copy email"}
+                  title={copied ? "Copied!" : "Copy"}
                 >
                   {copied ? "✓ Copied!" : "Copy"}
                 </button>
@@ -336,9 +336,9 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                     target={social.platform === "resume" ? undefined : "_blank"}
                     rel={social.platform === "resume" ? undefined : "noopener noreferrer"}
                     download={social.platform === "resume" ? true : undefined}
-                    className="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-800/50 hover:border-purple-500 hover:bg-purple-500/10 transition text-sm text-zinc-300 hover:text-purple-300 will-change-transform"
+                    className="px-4 py-2 rounded-full border border-zinc-700 bg-zinc-800/50 hover:border-blue-500 hover:bg-blue-500/10 transition text-sm text-zinc-300 hover:text-blue-300 will-change-transform"
                     aria-label={social.label}
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(168, 85, 247, 0.3)" }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)" }}
                     whileTap={{ scale: 0.95 }}
                   >
                     {social.label}
@@ -438,7 +438,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                           key={idx}
                           type="button"
                           onClick={() => handleReplySuggestionClick(suggestion)}
-                          className="text-xs px-3 py-1 rounded-full bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/50 transition cursor-pointer"
+                          className="text-xs px-3 py-1 rounded-full bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/50 transition cursor-pointer"
                         >
                           {suggestion}
                         </button>

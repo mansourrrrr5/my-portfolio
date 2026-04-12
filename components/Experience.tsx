@@ -106,42 +106,59 @@ export default function Experience({ config }: ExperienceProps) {
                 </div>
               </motion.div>
 
-              {/* Content card with hover effect */}
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors experience-card-hover">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                  <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
-                  <span
-                    className={`text-sm whitespace-nowrap ${
-                      isCurrent ? "text-purple-400 font-medium" : "text-zinc-400"
-                    }`}
-                  >
-                    {exp.period}
-                  </span>
+              {/* Content card with background image and overlay */}
+              <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 hover:border-zinc-700 transition-colors experience-card-hover overflow-hidden">
+                {/* Background image layer */}
+                {exp.image && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-40"
+                    style={{
+                      backgroundImage: `url('${exp.image}')`,
+                      backgroundAttachment: "fixed",
+                    }}
+                  />
+                )}
+
+                {/* Dark gradient overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/40 via-zinc-900/30 to-zinc-900/50" />
+
+                {/* Content layer */}
+                <div className="relative z-10">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                    <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
+                    <span
+                      className={`text-sm whitespace-nowrap ${
+                        isCurrent ? "text-purple-400 font-medium" : "text-zinc-400"
+                      }`}
+                    >
+                      {exp.period}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-zinc-300 mb-1 font-medium">
+                    {exp.company}
+                  </p>
+
+                  {exp.location && (
+                    <p className="text-xs text-zinc-500 mb-3">{exp.location}</p>
+                  )}
+
+                  <p className="text-zinc-300 mb-4">{exp.description}</p>
+
+                  {exp.highlights && exp.highlights.length > 0 && (
+                    <ul className="space-y-2">
+                      {exp.highlights.map((highlight, idx) => (
+                        <li
+                          key={idx}
+                          className="text-sm text-zinc-400 flex gap-2"
+                        >
+                          <span className="text-purple-400 flex-shrink-0">→</span>
+                          <span>{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-
-                <p className="text-sm text-zinc-300 mb-1 font-medium">
-                  {exp.company}
-                </p>
-
-                {exp.location && (
-                  <p className="text-xs text-zinc-500 mb-3">{exp.location}</p>
-                )}
-
-                <p className="text-zinc-300 mb-4">{exp.description}</p>
-
-                {exp.highlights && exp.highlights.length > 0 && (
-                  <ul className="space-y-2">
-                    {exp.highlights.map((highlight, idx) => (
-                      <li
-                        key={idx}
-                        className="text-sm text-zinc-400 flex gap-2"
-                      >
-                        <span className="text-purple-400 flex-shrink-0">→</span>
-                        <span>{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
             </div>
           );
