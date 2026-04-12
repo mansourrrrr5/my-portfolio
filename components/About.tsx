@@ -5,12 +5,14 @@ import { Card, Badge } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import type { PortfolioConfig } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 
 interface AboutProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
-function StatsSection() {
+function StatsSection({ dict }: { dict: TranslationDict }) {
   const { ref, className } = useScrollReveal({
     threshold: 0.3,
     delay: 50,
@@ -33,7 +35,7 @@ function StatsSection() {
             <span className="text-2xl">+</span>
           </div>
           <p className="text-xs text-zinc-400 text-center">
-            Years Experience
+            {dict.skills.stats.yearsLabel}
           </p>
         </Card>
 
@@ -43,7 +45,7 @@ function StatsSection() {
             {projectsCount}
           </div>
           <p className="text-xs text-zinc-400 text-center">
-            Projects Shipped
+            {dict.skills.stats.projectsLabel}
           </p>
         </Card>
 
@@ -54,7 +56,7 @@ function StatsSection() {
             <span className="text-2xl">%</span>
           </div>
           <p className="text-xs text-zinc-400 text-center">
-            Model Accuracy
+            {dict.skills.stats.accuracyLabel}
           </p>
         </Card>
       </div>
@@ -62,7 +64,7 @@ function StatsSection() {
   );
 }
 
-export default function About({ config }: AboutProps) {
+export default function About({ config, dict }: AboutProps) {
   const { ref: textRef, className: textClassName } = useScrollReveal({
     threshold: 0.3,
   });
@@ -86,7 +88,7 @@ export default function About({ config }: AboutProps) {
   return (
     <div className="w-full flex flex-col gap-8">
       {/* Stats Row */}
-      <StatsSection />
+      <StatsSection dict={dict} />
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Text Section */}
@@ -98,19 +100,13 @@ export default function About({ config }: AboutProps) {
             <Card>
               <div className="flex flex-col gap-4">
                 <p className="text-zinc-300 text-lg leading-relaxed">
-                  {config.description}
+                  {dict.about.description}
                 </p>
-                <p className="text-zinc-400 leading-relaxed">
-                  I currently work as a Working Student IT in Robotics R&D at
-                  Swisslog, where I contribute to innovative automation projects
-                  and collaborate with talented engineers on real-world challenges.
-                </p>
-                <p className="text-zinc-400 leading-relaxed">
-                  For my Bachelor thesis, I integrated YOLO-based object detection
-                  into the SweetPicker robotic system, enabling real-time vision
-                  and smarter automation for industrial robotics. Passionate about
-                  leveraging AI to solve complex problems.
-                </p>
+                {dict.about.story.map((paragraph, index) => (
+                  <p key={index} className="text-zinc-400 leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </Card>
           </div>
@@ -124,7 +120,7 @@ export default function About({ config }: AboutProps) {
           >
             <Card>
               <h3 className="text-zinc-200 text-base font-semibold mb-4 tracking-wide uppercase">
-                Key Skills
+                {dict.skills.keySkills}
               </h3>
               <div className="space-y-4">
                 {Object.entries(skillsByCategory)

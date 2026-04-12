@@ -3,6 +3,11 @@
 import { Card, SectionGrid } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { motion } from "framer-motion";
+import type { TranslationDict } from "@/messages/en";
+
+interface ApproachProps {
+  dict: TranslationDict;
+}
 
 const approachStyles = `
   @keyframes approach-entry {
@@ -196,41 +201,8 @@ function ApproachCard(phase: ApproachPhase, index: number) {
   );
 }
 
-export default function Approach() {
-  const phases: ApproachPhase[] = [
-    {
-      step: "01",
-      subtitle: "Foundation",
-      title: "Understand the Problem",
-      description:
-        "Every project starts with clarity. Before writing code, I focus on understanding the real problem, the goals of the system, and the constraints involved. A clear understanding early on helps avoid unnecessary complexity and leads to better technical decisions later.",
-      focus: ["Requirements Analysis", "System Constraints", "Edge Cases"],
-    },
-    {
-      step: "02",
-      subtitle: "Design Thoughtful Solutions",
-      title: "Design with Scalability",
-      description:
-        "Once the problem is clear, I think about the structure of the solution. This includes choosing appropriate technologies, designing a maintainable architecture, and considering scalability from the beginning.",
-      focus: ["Scalable Architecture", "Performance First", "Maintainability"],
-    },
-    {
-      step: "03",
-      subtitle: "Implementation",
-      title: "Build & Integrate Carefully",
-      description:
-        "During development, I focus on writing clean, readable, and reliable code. Good implementation is not only about making something work, but also ensuring it can be understood, extended, and maintained over time.",
-      focus: ["Production Code", "Clean Integration", "Reliability"],
-    },
-    {
-      step: "04",
-      subtitle: "Refinement",
-      title: "Optimize, Test & Deploy",
-      description:
-        "Once built, continuous refinement is essential. I test thoroughly, benchmark performance, optimize bottlenecks, and ensure the solution is robust and ready for production. This iterative approach catches issues early and delivers solutions that actually work at scale.",
-      focus: ["Performance Tuning", "Comprehensive Testing", "Deployment Ready"],
-    },
-  ];
+export default function Approach({ dict }: ApproachProps) {
+  const phases = dict.approach.phases;
 
   return (
     <>

@@ -21,16 +21,22 @@ export const de: TranslationDict = {
     name: "Aziz",
     titles: ["Softwareingenieur", "KI-Spezialist", "IT-Ingenieur"],
     specialty: ["Computervision", "KI-Systeme", "Full-Stack-Entwicklung"],
+    subtitle: "Willkommen in meinem Portfolio",
     headline: "Intelligente Lösungen aufbauen",
+    description: "baue intelligente und skalierbare Anwendungen, die die Grenzen des Möglichen verschieben.",
     subheadline:
       "Leidenschaftlich daran interessiert, Softwaretechnik mit KI zu kombinieren, um komplexe Probleme zu lösen. Expertise in Computervision, maschinellem Lernen und Full-Stack-Entwicklung.",
-    ctaScroll: "Zum Erkunden scrollen",
+    ctaViewWork: "Meine Arbeiten ansehen",
     ctaConnect: "Lassen Sie uns verbinden",
   },
   about: {
     title: "Über mich",
     description:
       "Ich bin Softwareingenieur mit einer Leidenschaft für intelligente Lösungen. Meine Reise begann mit der Neugier, wie Maschinen lernen, was mich zur Spezialisierung auf maschinelles Lernen und Computer Vision führte. Heute verbinde ich bahnbrechende KI mit praktischer Softwareentwicklung.",
+    story: [
+      "Ich arbeite derzeit als Studentische Hilfskraft IT in der Robotik F&E bei Swisslog, wo ich zu innovativen Automatisierungsprojekten beitrage und mit talentierten Ingenieuren an realen Herausforderungen zusammenarbeite.",
+      "Für meine Bachelorarbeit integrierte ich YOLO-basierte Objekterkennung in das SweetPicker-Robotersystem und ermöglichte so Echtzeit-Vision und intelligere Automatisierung für industrielle Robotik. Leidenschaftlich daran interessiert, KI zur Lösung komplexer Probleme einzusetzen.",
+    ],
     highlights: [
       "Expertise in Python, C/C++ und Full-Stack-Webentwicklung",
       "Spezialisiert auf Systeme für maschinelles Lernen und Computer Vision",
@@ -46,6 +52,41 @@ export const de: TranslationDict = {
       ml: "Maschinelles Lernen",
       devops: "DevOps & Infrastruktur",
       tools: "Tools & Versionskontrolle",
+    },
+    focusAreas: [
+      {
+        title: "KI & Computervision",
+        proof: "Entwicklung von Echtzeit-Objekterkennungs-Pipelines für industrielle Robotik bei Swisslog",
+      },
+      {
+        title: "Backend-Entwicklung",
+        proof: "Gestaltung von KI-Backend-Services und Datenpipelines in der Produktionsumgebung",
+      },
+      {
+        title: "Frontend-Entwicklung",
+        proof: "Entwicklung dieses Portfolios und interaktiver Dashboards mit modernen React-Mustern",
+      },
+      {
+        title: "DevOps & Infrastruktur",
+        proof: "Containerisierung von KI-Inferenz-Pipelines und Verwaltung von Linux-basierten Deployment-Umgebungen",
+      },
+    ],
+    keySkills: "Wichtigste Fähigkeiten",
+    fullStack: "Kompletter Stack",
+    skillMatcher: {
+      title: "Skills Match Analyzer",
+      description: "Fügen Sie eine Stellenausschreibung ein, um zu sehen, wie meine Fähigkeiten zur Rolle passen",
+      placeholder: "Fügen Sie hier eine Stellenausschreibung ein...",
+      analyzeButton: "Match Analysieren",
+      analyzing: "Wird analysiert...",
+      fitScore: "Passungsgrad",
+      matchedSkills: "✓ Übereinstimmende Fähigkeiten",
+      growthOpportunities: "⚠ Wachstumsmöglichkeiten",
+    },
+    stats: {
+      yearsLabel: "Jahre Erfahrung",
+      projectsLabel: "Projekte Veröffentlicht",
+      accuracyLabel: "Modellgenauigkeit",
     },
   },
   experience: {
@@ -64,6 +105,40 @@ export const de: TranslationDict = {
   approach: {
     title: "Mein Prozess",
     subtitle: "Wie ich Softwareentwicklung angehe",
+    phases: [
+      {
+        step: "01",
+        subtitle: "Grundlagen",
+        title: "Das Problem verstehen",
+        description:
+          "Jedes Projekt beginnt mit Klarheit. Bevor ich Code schreibe, konzentriere ich mich darauf, das eigentliche Problem, die Ziele des Systems und die beteiligten Einschränkungen zu verstehen. Ein klares Verständnis früh vermeidet unnötige Komplexität und führt zu besseren technischen Entscheidungen später.",
+        focus: ["Anforderungsanalyse", "Systembeschränkungen", "Grenzfälle"],
+      },
+      {
+        step: "02",
+        subtitle: "Durchdachte Lösungen",
+        title: "Skalierbare Gestaltung",
+        description:
+          "Sobald das Problem klar ist, überlege ich mir die Struktur der Lösung. Dies umfasst die Auswahl angemessener Technologien, das Entwerfen einer wartbaren Architektur und die Berücksichtigung von Skalierbarkeit von Anfang an.",
+        focus: ["Skalierbare Architektur", "Performance First", "Wartbarkeit"],
+      },
+      {
+        step: "03",
+        subtitle: "Implementierung",
+        title: "Sorgfältig bauen & integrieren",
+        description:
+          "Während der Entwicklung konzentriere ich mich auf das Schreiben von sauberer, lesbarer und zuverlässiger Code. Gute Implementierung bedeutet nicht nur, dass etwas funktioniert, sondern auch, dass es verstanden, erweitert und über die Zeit hinweg gepflegt werden kann.",
+        focus: ["Produktionscode", "Saubere Integration", "Zuverlässigkeit"],
+      },
+      {
+        step: "04",
+        subtitle: "Verfeinerung",
+        title: "Optimieren, Testen & Bereitstellen",
+        description:
+          "Nach dem Build ist kontinuierliche Verfeinerung essentiell. Ich teste gründlich, messe Performance, optimiere Engpässe und stelle sicher, dass die Lösung robust und produktionsreif ist. Dieser iterative Ansatz erkennt Probleme früh und liefert Lösungen, die tatsächlich im großen Maßstab funktionieren.",
+        focus: ["Performance-Tuning", "Umfassendes Testen", "Bereitstellungsreife"],
+      },
+    ],
   },
   contact: {
     title: "Lassen Sie uns etwas Großartiges schaffen",

@@ -3,14 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import type { TranslationDict } from "@/messages/en";
 
-const navItems = [
-  { name: "About", link: "#about" },
-  { name: "Skills", link: "#skills" },
-  { name: "Experience", link: "#experience" },
-  { name: "Projects", link: "#projects" },
-  { name: "Testimonials", link: "#testimonials" },
-  { name: "Contact", link: "#contact" },
+interface NavbarProps {
+  dict: TranslationDict;
+}
+
+const getNavItems = (dict: TranslationDict) => [
+  { name: dict.navbar.about, link: "#about" },
+  { name: dict.navbar.skills, link: "#skills" },
+  { name: dict.navbar.experience, link: "#experience" },
+  { name: dict.navbar.projects, link: "#projects" },
+  { name: dict.navbar.testimonials, link: "#testimonials" },
+  { name: dict.navbar.contact, link: "#contact" },
 ];
 
 const scrollProgressStyles = `
@@ -39,7 +44,8 @@ const scrollProgressStyles = `
   }
 `;
 
-export default function Navbar() {
+export default function Navbar({ dict }: NavbarProps) {
+  const navItems = getNavItems(dict);
   const router = useRouter();
   const pathname = usePathname();
   const [active, setActive] = useState("#about");

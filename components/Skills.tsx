@@ -3,41 +3,26 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { PortfolioConfig } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 
 interface SkillsProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
-const focusAreas = [
-  {
-    title: "AI & Computer Vision",
+const getFocusAreas = (dict: TranslationDict) => 
+  dict.skills.focusAreas.map((area, index) => ({
+    ...area,
     icon: "",
-    color: "purple" as const,
-    tags: ["Python", "YOLO", "OpenCV", "Machine Learning", "Computer Vision"],
-    proof: "Built real-time object detection pipelines for industrial robotics at Swisslog",
-  },
-  {
-    title: "Backend Engineering",
-    icon: "",
-    color: "blue" as const,
-    tags: ["FastAPI", "WebSockets", "Elasticsearch", "SQL", "REST APIs"],
-    proof: "Designed real-time AI backend services and data pipelines for production systems",
-  },
-  {
-    title: "Frontend Development",
-    icon: "",
-    color: "cyan" as const,
-    tags: ["Next.js", "React", "TypeScript", "TailwindCSS"],
-    proof: "Built this portfolio and interactive dashboards with modern React patterns",
-  },
-  {
-    title: "DevOps & Infrastructure",
-    icon: "",
-    color: "emerald" as const,
-    tags: ["Docker", "Linux", "Git", "CI/CD"],
-    proof: "Containerized AI inference pipelines and managed Linux-based deployment environments",
-  },
-];
+    color: ["purple", "blue", "cyan", "emerald"][index] as "purple" | "blue" | "cyan" | "emerald",
+    tags: dict.skills.focusAreas[index]?.title === "AI & Computer Vision" 
+      ? ["Python", "YOLO", "OpenCV", "Machine Learning", "Computer Vision"]
+      : dict.skills.focusAreas[index]?.title === "Backend Engineering"
+      ? ["FastAPI", "WebSockets", "Elasticsearch", "SQL", "REST APIs"]
+      : dict.skills.focusAreas[index]?.title === "Frontend Development"
+      ? ["Next.js", "React", "TypeScript", "TailwindCSS"]
+      : ["Docker", "Linux", "Git", "CI/CD"],
+  }));
 
 const colorMap: Record<"purple" | "blue" | "cyan" | "emerald", { border: string; shadow: string }> = {
   purple: {
@@ -103,7 +88,7 @@ function FocusCard({ title, icon, color, tags, proof }: FocusCardProps) {
   );
 }
 
-function SkillMatcher({ config }: { config: PortfolioConfig }) {
+function SkillMatcher({ config, dict }: { config: PortfolioConfig; dict: TranslationDict }) {
   const [roleDescription, setRoleDescription] = useState("");
   const [matchResults, setMatchResults] = useState<{
     matched: string[];
@@ -213,10 +198,10 @@ Rules:
     <div className="mt-20 max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h2 className="text-xl font-semibold text-white mb-2">
-          Skills Match Analyzer
+          {dict.skills.skillMatcher.title}
         </h2>
         <p className="text-sm text-zinc-400">
-          Paste a job description to see how my skills align with the role
+          {dict.skills.skillMatcher.description}
         </p>
       </div>
 
@@ -225,7 +210,7 @@ Rules:
           <textarea
             value={roleDescription}
             onChange={(e) => setRoleDescription(e.target.value)}
-            placeholder="Paste a job description here..."
+            placeholder={dict.skills.skillMatcher.placeholder}
             rows={4}
             className="w-full px-4 py-3 rounded-lg bg-zinc-700 text-white placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           />
@@ -235,7 +220,7 @@ Rules:
             disabled={loading || !roleDescription.trim()}
             className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-zinc-700 disabled:to-zinc-700 text-white font-medium transition"
           >
-            {loading ? "Analyzing..." : "Analyze Match"}
+            {loading ? dict.skills.skillMatcher.analyzing : dict.skills.skillMatcher.analyzeButton}
           </button>
 
           {matchResults && (
@@ -284,7 +269,7 @@ Rules:
 
                 <div>
                   <p className="text-sm text-zinc-300 font-medium mb-2">
-                    Fit Score
+                    {dict.skills.skillMatcher.fitScore}
                   </p>
                   <p className="text-xs text-zinc-400">
                     {matchResults.summary}
@@ -295,7 +280,7 @@ Rules:
               {matchResults.matched.length > 0 && (
                 <div>
                   <p className="text-xs uppercase tracking-wider text-green-400 mb-2 font-medium">
-                    ✓ Matched Skills
+                    ✓ {dict.skills.skillMatcher.matchedSkills}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {matchResults.matched.map((skill) => (
@@ -313,7 +298,7 @@ Rules:
               {matchResults.gaps.length > 0 && (
                 <div>
                   <p className="text-xs uppercase tracking-wider text-amber-400 mb-2 font-medium">
-                    ⚠ Growth Opportunities
+                    ⚠ {dict.skills.skillMatcher.growthOpportunities}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {matchResults.gaps.map((skill) => (
@@ -334,8 +319,9 @@ Rules:
     </div>
   );
 }
-export default function Skills({ config }: SkillsProps) {
+export default function Skills({ config, dict }: SkillsProps) {
   // Extract all unique tags from focusAreas
+  const focusAreas = getFocusAreas(dict);
   const allTags = Array.from(new Set(focusAreas.flatMap((area) => area.tags))).sort();
 
   const containerVariants = {
@@ -361,7 +347,7 @@ export default function Skills({ config }: SkillsProps) {
       {/* Section 2 - Full tech stack strip */}
       <div>
         <p className="text-xs uppercase tracking-widest text-zinc-500 mb-4">
-          Full Stack
+          {dict.skills.fullStack}
         </p>
         <div className="flex flex-wrap gap-2">
           {allTags.map((tag) => (
@@ -376,7 +362,7 @@ export default function Skills({ config }: SkillsProps) {
       </div>
 
       {/* Section 3 - AI Skill Analyzer */}
-      <SkillMatcher config={config} />
+      <SkillMatcher config={config} dict={dict} />
     </div>
   );
 }

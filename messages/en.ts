@@ -19,16 +19,22 @@ export const en = {
     name: "Aziz",
     titles: ["Software Engineer", "AI Specialist", "IT Engineer"],
     specialty: ["Computer Vision", "AI Systems", "Full-Stack Development"],
+    subtitle: "Welcome to my portfolio",
     headline: "Building Intelligent Solutions",
+    description: "building intelligent and scalable applications that push the boundaries of what's possible.",
     subheadline:
       "Passionate about combining software engineering with AI to solve complex problems. Expertise in computer vision, machine learning, and full-stack development.",
-    ctaScroll: "Scroll to explore",
+    ctaViewWork: "View my work",
     ctaConnect: "Let's connect",
   },
   about: {
     title: "About Me",
     description:
       "I'm a software engineer with a passion for building intelligent solutions. My journey began with curiosity about how machines learn, which led me to specialize in machine learning and computer vision. Today, I bridge the gap between cutting-edge AI and practical software engineering.",
+    story: [
+      "I currently work as a Working Student IT in Robotics R&D at Swisslog, where I contribute to innovative automation projects and collaborate with talented engineers on real-world challenges.",
+      "For my Bachelor thesis, I integrated YOLO-based object detection into the SweetPicker robotic system, enabling real-time vision and smarter automation for industrial robotics. Passionate about leveraging AI to solve complex problems.",
+    ],
     highlights: [
       "Expertise in Python, C/C++, and full-stack web development",
       "Specialized in machine learning and computer vision systems",
@@ -44,6 +50,41 @@ export const en = {
       ml: "Machine Learning",
       devops: "DevOps & Infrastructure",
       tools: "Tools & Version Control",
+    },
+    focusAreas: [
+      {
+        title: "AI & Computer Vision",
+        proof: "Built real-time object detection pipelines for industrial robotics at Swisslog",
+      },
+      {
+        title: "Backend Engineering",
+        proof: "Designed real-time AI backend services and data pipelines for production systems",
+      },
+      {
+        title: "Frontend Development",
+        proof: "Built this portfolio and interactive dashboards with modern React patterns",
+      },
+      {
+        title: "DevOps & Infrastructure",
+        proof: "Containerized AI inference pipelines and managed Linux-based deployment environments",
+      },
+    ],
+    keySkills: "Key Skills",
+    fullStack: "Full Stack",
+    skillMatcher: {
+      title: "Skills Match Analyzer",
+      description: "Paste a job description to see how my skills align with the role",
+      placeholder: "Paste a job description here...",
+      analyzeButton: "Analyze Match",
+      analyzing: "Analyzing...",
+      fitScore: "Fit Score",
+      matchedSkills: "✓ Matched Skills",
+      growthOpportunities: "⚠ Growth Opportunities",
+    },
+    stats: {
+      yearsLabel: "Years Experience",
+      projectsLabel: "Projects Shipped",
+      accuracyLabel: "Model Accuracy",
     },
   },
   experience: {
@@ -62,6 +103,40 @@ export const en = {
   approach: {
     title: "My Process",
     subtitle: "How I approach software development",
+    phases: [
+      {
+        step: "01",
+        subtitle: "Foundation",
+        title: "Understand the Problem",
+        description:
+          "Every project starts with clarity. Before writing code, I focus on understanding the real problem, the goals of the system, and the constraints involved. A clear understanding early on helps avoid unnecessary complexity and leads to better technical decisions later.",
+        focus: ["Requirements Analysis", "System Constraints", "Edge Cases"],
+      },
+      {
+        step: "02",
+        subtitle: "Design Thoughtful Solutions",
+        title: "Design with Scalability",
+        description:
+          "Once the problem is clear, I think about the structure of the solution. This includes choosing appropriate technologies, designing a maintainable architecture, and considering scalability from the beginning.",
+        focus: ["Scalable Architecture", "Performance First", "Maintainability"],
+      },
+      {
+        step: "03",
+        subtitle: "Implementation",
+        title: "Build & Integrate Carefully",
+        description:
+          "During development, I focus on writing clean, readable, and reliable code. Good implementation is not only about making something work, but also ensuring it can be understood, extended, and maintained over time.",
+        focus: ["Production Code", "Clean Integration", "Reliability"],
+      },
+      {
+        step: "04",
+        subtitle: "Refinement",
+        title: "Optimize, Test & Deploy",
+        description:
+          "Once built, continuous refinement is essential. I test thoroughly, benchmark performance, optimize bottlenecks, and ensure the solution is robust and ready for production. This iterative approach catches issues early and delivers solutions that actually work at scale.",
+        focus: ["Performance Tuning", "Comprehensive Testing", "Deployment Ready"],
+      },
+    ],
   },
   contact: {
     title: "Get In Touch",

@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import type { PortfolioConfig } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { ContactSocialButton } from "@/components/ui/contact-social-button";
 
 interface ContactProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
 const contactStyles = `
@@ -59,7 +61,7 @@ const contactStyles = `
 const MAX_MESSAGE_LENGTH = 500;
 const MIN_MESSAGE_LENGTH = 10;
 
-export default function Contact({ config }: ContactProps) {
+export default function Contact({ config, dict }: ContactProps) {
   const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -297,17 +299,17 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Let's build something amazing
+                {dict.contact.title}
               </span>
             </h2>
 
             <p className="text-zinc-300 text-lg mb-8 leading-relaxed">
-              Have a project in mind? Let's collaborate and create something extraordinary together.
+              {dict.contact.description}
             </p>
 
             {/* Email Section */}
             <div className="mb-8">
-              <p className="text-sm text-zinc-400 mb-2">Email</p>
+              <p className="text-sm text-zinc-400 mb-2">{dict.contact.email}</p>
               <div className="flex items-center gap-3">
                 <a
                   href={`mailto:${config.email}`}
@@ -319,16 +321,16 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                   onClick={handleCopyEmail}
                   className="px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 hover:border-blue-500 hover:bg-blue-500/20 transition text-xs text-blue-400 font-medium"
                   aria-label="Copy email address to clipboard"
-                  title={copied ? "Copied!" : "Copy"}
+                  title={copied ? dict.contact.copied : dict.contact.copy}
                 >
-                  {copied ? "✓ Copied!" : "Copy"}
+                  {copied ? dict.contact.copied : dict.contact.copy}
                 </button>
               </div>
             </div>
 
             {/* Social Links */}
             <div className="space-y-3">
-              <p className="text-sm text-zinc-400 mb-3">Follow</p>
+              <p className="text-sm text-zinc-400 mb-3">{dict.followLinks.title}</p>
               <div className="flex flex-wrap gap-3">
                 {config.socials.map((social: any) => (
                   <ContactSocialButton
@@ -353,7 +355,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
               {/* Email Input */}
               <div>
                 <label htmlFor="contact-email" className="block text-sm font-medium text-zinc-300 mb-2">
-                  Your Email
+                  {dict.contact.yourEmail}
                 </label>
                 <div className="relative">
                   <input
@@ -361,7 +363,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                     type="email"
                     value={email}
                     onChange={handleEmailChange}
-                    placeholder="you@example.com"
+                    placeholder="you@example.com" // Keep example generic
                     className={`w-full px-4 py-3 rounded-xl contact-input text-white placeholder-zinc-500 ${
                       email && emailError ? "error" : email && isEmailValid(email) ? "success" : ""
                     }`}
@@ -374,21 +376,21 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                   )}
                 </div>
                 {emailError && (
-                  <p className="text-red-400 text-xs mt-1">{emailError}</p>
+                  <p className="text-red-400 text-xs mt-1">{emailError || dict.contact.invalidEmail}</p>
                 )}
               </div>
 
               {/* Message Input */}
               <div>
                 <label htmlFor="contact-message" className="block text-sm font-medium text-zinc-300 mb-2">
-                  Message
+                  {dict.contact.message}
                 </label>
                 <div className="relative">
                   <textarea
                     id="contact-message"
                     value={message}
                     onChange={handleMessageChange}
-                    placeholder="Tell me about your project..."
+                    placeholder={dict.contact.description}
                     rows={5}
                     maxLength={MAX_MESSAGE_LENGTH}
                     className={`w-full px-4 py-3 rounded-xl contact-input text-white placeholder-zinc-500 resize-none ${
@@ -398,7 +400,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                   {/* Min length hint - fades away at 10 chars */}
                   {messageCharCount > 0 && messageCharCount < MIN_MESSAGE_LENGTH && (
                     <div className="absolute right-4 top-3 text-zinc-400 text-xs min-length-hint">
-                      min {MIN_MESSAGE_LENGTH} chars
+                      {dict.contact.minLengthHint(MIN_MESSAGE_LENGTH)}
                     </div>
                   )}
                   {/* Success/error indicators */}
@@ -426,7 +428,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-4 space-y-2"
                   >
-                    <p className="text-xs text-zinc-400">Suggested replies:</p>
+                    <p className="text-xs text-zinc-400">{dict.contact.suggestedReplies}</p>
                     <div className="flex flex-wrap gap-2">
                       {replySuggestions.map((suggestion, idx) => (
                         <button
@@ -439,7 +441,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-zinc-500">Click any to copy to clipboard</p>
+                    <p className="text-xs text-zinc-500">{dict.contact.clickToCopy}</p>
                   </motion.div>
                 )}
 
@@ -456,20 +458,20 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
               {(() => {
                 const quickQuestions = [
                   { 
-                    label: "Projects", 
-                    question: "Tell me about Aziz's key projects and what makes them technically impressive." 
+                    label: dict.contact.quickQuestions.projects, 
+                    question: dict.contact.quickQuestions.projectsQuestion 
                   },
                   { 
-                    label: "Experience", 
-                    question: "What is Aziz's professional experience and what has he built at Swisslog?" 
+                    label: dict.contact.quickQuestions.experience, 
+                    question: dict.contact.quickQuestions.experienceQuestion 
                   },
                   { 
-                    label: "Tech Stack", 
-                    question: "What technologies does Aziz specialize in and what is he strongest at?" 
+                    label: dict.contact.quickQuestions.techStack, 
+                    question: dict.contact.quickQuestions.techStackQuestion 
                   },
                   { 
-                    label: "Work with Aziz", 
-                    question: "Why should I hire Aziz and what kind of roles suit him best?" 
+                    label: dict.contact.quickQuestions.hire, 
+                    question: dict.contact.quickQuestions.hireQuestion 
                   },
                 ];
 
@@ -485,7 +487,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                     animate={{ opacity: 1 }}
                     className="rounded-xl border border-zinc-700 bg-zinc-800/30 p-4 space-y-3"
                   >
-                    <p className="text-sm font-medium text-zinc-300">Ask AI about Aziz</p>
+                    <p className="text-sm font-medium text-zinc-300">{dict.contact.askAI}</p>
                     <div className="flex flex-wrap gap-2">
                       {quickQuestions.map((q) => (
                         <motion.button
@@ -506,7 +508,7 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                       ))}
                     </div>
                     <p className="text-xs text-zinc-500">
-                      Click any topic to ask the AI assistant instantly
+                      {dict.contact.askAISubtitle}
                     </p>
                   </motion.div>
                 );
@@ -550,21 +552,21 @@ const fetchSmartReplySuggestions = async (messageText: string) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    Sending...
+                    {dict.contact.sending}
                   </>
                 )}
                 {status === "success" && (
                   <>
                     <span className="text-lg">✓</span>
-                    Message Sent!
+                    {dict.contact.sentMessage}
                   </>
                 )}
-                {status !== "loading" && status !== "success" && "Send Message"}
+                {status !== "loading" && status !== "success" && dict.contact.sendButton}
               </motion.button>
 
               {status === "success" && (
                 <p className="text-green-400 text-sm text-center animate-pulse">
-                  Thanks for your message! I'll get back to you soon.
+                  {dict.contact.successText}
                 </p>
               )}
             </form>

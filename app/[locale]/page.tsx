@@ -226,12 +226,12 @@ export default function Page({ params }: PageProps) {
 
         {/* Hero Section */}
         <div ref={heroRef} className="relative" style={{ height: "auto" }}>
-          <Hero config={portfolioConfig} />
+          <Hero config={portfolioConfig} dict={dict} />
         </div>
 
         {/* Content */}
         <div className="relative z-10">
-          <Navbar />
+          <Navbar dict={dict} />
           <Container>
 
             {isClient ? (
@@ -242,17 +242,17 @@ export default function Page({ params }: PageProps) {
                 }}
               >
                 <Section id="about" title={dict.about.title}>
-                  <About config={portfolioConfig} />
+                  <About config={portfolioConfig} dict={dict} />
                 </Section>
               </motion.div>
             ) : (
               <Section id="about" title={dict.about.title}>
-                <About config={portfolioConfig} />
+                <About config={portfolioConfig} dict={dict} />
               </Section>
             )}
 
             <Section id="skills" title={dict.skills.title}>
-              <Skills config={portfolioConfig} />
+              <Skills config={portfolioConfig} dict={dict} />
             </Section>
 
             <Section id="experience" title={dict.experience.title}>
@@ -271,12 +271,12 @@ export default function Page({ params }: PageProps) {
 
             <Section id="approach" title={dict.approach.title}>
               <Suspense fallback={<SectionSkeleton />}>
-                <Approach />
+                <Approach dict={dict} />
               </Suspense>
             </Section>
 
             <Section id="contact" title={dict.contact.title}>
-              <Contact config={portfolioConfig} />
+              <Contact config={portfolioConfig} dict={dict} />
             </Section>
           </Container>
         </div>

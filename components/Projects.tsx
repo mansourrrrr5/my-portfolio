@@ -3,11 +3,13 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { PortfolioConfig, Project } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 import { Card, Badge, SectionGrid } from "@/components/ui/Card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface ProjectsProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
 const projectStyles = `

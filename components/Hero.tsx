@@ -7,9 +7,11 @@ import { DottedSurface } from "@/components/ui/dotted-surface";
 import { HeroSocialButton } from "@/components/ui/hero-social-button";
 import { useState, useRef, useEffect } from "react";
 import type { PortfolioConfig } from "@/types";
+import type { TranslationDict } from "@/messages/en";
 
 interface HeroProps {
   config: PortfolioConfig;
+  dict: TranslationDict;
 }
 
 const titles = ["Software Engineer", "AI Specialist", "IT Engineer"];
@@ -90,7 +92,7 @@ function generateParticles(count: number) {
 // Specialties list
 const specialties = ["Computer Vision", "AI Systems", "Full-Stack Development"];
 
-export default function Hero({ config }: HeroProps) {
+export default function Hero({ config, dict }: HeroProps) {
   const [particles] = useState(() => generateParticles(8));
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const button1Ref = useRef<HTMLAnchorElement>(null);
@@ -120,7 +122,7 @@ export default function Hero({ config }: HeroProps) {
   }, []);
 
   const typewriterText = useTypewriter({
-    words: titles,
+    words: dict.hero.titles,
     speed: 80,
     delayBetweenWords: 2000,
     loop: true,
@@ -254,7 +256,7 @@ export default function Hero({ config }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: reducedMotion ? 0 : 0.15, duration: reducedMotion ? 0 : 0.5 }}
           >
-            Welcome to my portfolio
+            {dict.hero.subtitle}
           </motion.p>
 
           {/* Main heading */}
@@ -292,12 +294,12 @@ export default function Hero({ config }: HeroProps) {
             transition={{ delay: reducedMotion ? 0 : 0.4, duration: reducedMotion ? 0 : 0.6 }}
           >
             <p className="text-lg md:text-xl text-zinc-300 leading-relaxed max-w-lg">
-              <span className="font-semibold text-white">{typewriterText}</span> building intelligent  and scalable applications that push the boundaries of what's possible.
+              <span className="font-semibold text-white">{typewriterText}</span> {dict.hero.description}
             </p>
 
             {/* Specialties */}
             <p className="text-sm text-zinc-400 specialty-text">
-              {specialties.join(" • ")}
+              {dict.hero.specialty.join(" • ")}
             </p>
           </motion.div>
 
@@ -346,7 +348,7 @@ export default function Hero({ config }: HeroProps) {
               whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
               whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
             >
-              View my work
+              {dict.hero.ctaViewWork}
               <span className="ml-2 inline-block group-hover:translate-x-1 transition-transform">→</span>
             </motion.a>
 
@@ -361,7 +363,7 @@ export default function Hero({ config }: HeroProps) {
               whileHover={{ scale: reducedMotion ? 1 : 1.05 }}
               whileTap={{ scale: reducedMotion ? 1 : 0.95 }}
             >
-              Let's connect
+              {dict.hero.ctaConnect}
             </motion.a>
           </motion.div>
         </motion.div>
